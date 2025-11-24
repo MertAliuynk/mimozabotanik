@@ -12,6 +12,29 @@ interface FormData {
   longitude: number;
 }
 
+interface WorkingHours {
+  monday: { open: string; close: string; isOpen: boolean };
+  tuesday: { open: string; close: string; isOpen: boolean };
+  wednesday: { open: string; close: string; isOpen: boolean };
+  thursday: { open: string; close: string; isOpen: boolean };
+  friday: { open: string; close: string; isOpen: boolean };
+  saturday: { open: string; close: string; isOpen: boolean };
+  sunday: { open: string; close: string; isOpen: boolean };
+}
+
+interface ContactInfo {
+  id: string;
+  companyName: string;
+  address: string;
+  phone: string;
+  email: string;
+  latitude: number;
+  longitude: number;
+  workingHours: WorkingHours;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function ContactInfoAdmin() {
   const [formData, setFormData] = useState<FormData>({
     companyName: '',
@@ -23,7 +46,10 @@ export default function ContactInfoAdmin() {
   });
 
   // Queries
-  const { data: contactInfo, refetch } = api.contactInfo.get.useQuery();
+  const { data: contactInfo, refetch } = api.contactInfo.get.useQuery() as {
+    data: ContactInfo | undefined;
+    refetch: () => void;
+  };
 
   // Mutations
   const updateMutation = api.contactInfo.update.useMutation({
@@ -34,7 +60,7 @@ export default function ContactInfoAdmin() {
     onError: (error: any) => {
       alert('Hata: ' + error.message);
     }
-  });
+  }) as any;
 
   useEffect(() => {
     if (contactInfo) {
@@ -52,7 +78,7 @@ export default function ContactInfoAdmin() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Default working hours
-    const workingHours = {
+    const workingHours: WorkingHours = {
       monday: { open: '09:00', close: '18:00', isOpen: true },
       tuesday: { open: '09:00', close: '18:00', isOpen: true },
       wednesday: { open: '09:00', close: '18:00', isOpen: true },

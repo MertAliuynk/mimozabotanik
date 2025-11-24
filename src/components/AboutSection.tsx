@@ -32,7 +32,7 @@ export function AboutSection() {
           <div className="space-y-6">
             <p className="text-gray-700 leading-relaxed text-lg">
               Ankara'da peyzaj tasarım ve bahçe düzenleme hizmetlerinin lider isimlerinden 
-              Greenpark Peyzaj olarak, sektördeki 8 yılı aşkın deneyimimizle adımızdan söz 
+              mimoza botanik olarak, sektördeki 8 yılı aşkın deneyimimizle adımızdan söz 
               ettiriyoruz. Kurulduğumuz günden bu yana peyzaj projelerinden uygulama ve 
               bakıma, profesyonel peyzaj danışmanlığına kadar sektörün her alanında 
               denememesine bilgi birikimimizi artırmaya devam ediyoruz. Deneyimli çalışma 

@@ -14,7 +14,7 @@ export function HeroSection() {
       <div className="relative z-10 flex items-center justify-center h-full">
         <div className="text-center">
           <h1 className="text-white text-4xl md:text-6xl lg:text-7xl font-bold tracking-wider">
-            GREENPARK PEYZAJ
+            Mimoza Botanik
           </h1>
           {/* Green line under title like other pages */}
           <div className="w-48 h-1 bg-green-500 mx-auto mt-4"></div>

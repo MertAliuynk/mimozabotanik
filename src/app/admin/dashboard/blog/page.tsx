@@ -159,7 +159,7 @@ export default function AdminBlogPage() {
         published: post.published,
         featured: post.featured,
         categoryId: post.categoryId || '',
-        image: post.images?.[0]?.url || '',
+        image: (post as any).images?.[0]?.url || '',
       });
     } else {
       setEditingPost(null);
@@ -277,10 +277,10 @@ export default function AdminBlogPage() {
                 <div className="flex items-start gap-4">
                   {/* Featured Image */}
                   <div className="shrink-0">
-                    {post.images?.[0] ? (
+                    {(post as any).images?.[0] ? (
                       <div className="relative w-20 h-16 rounded-lg overflow-hidden">
                         <Image
-                          src={post.images?.[0]?.url || ''}
+                          src={(post as any).images?.[0]?.url || ''}
                           alt={post.title}
                           fill
                           className="object-cover"

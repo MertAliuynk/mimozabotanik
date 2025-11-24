@@ -14,8 +14,8 @@ interface Reference {
   website: string | null;
   order: number;
   published: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }
 
 export default function AdminReferencesPage() {
@@ -39,7 +39,7 @@ export default function AdminReferencesPage() {
     refetch 
   } = api.reference.getAllAdmin.useQuery(undefined, {
     staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
   const createReference = api.reference.create.useMutation({

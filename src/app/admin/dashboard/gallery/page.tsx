@@ -9,17 +9,20 @@ import { debounce } from 'lodash';
 interface Gallery {
   id: string;
   title: string;
-  description?: string;
+  description: string | null;
   order: number;
   published: boolean;
   images: {
     id: string;
     url: string;
-    alt?: string;
+    alt: string | null;
     order: number;
+    createdAt: string;
+    updatedAt: string;
+    galleryId: string;
   }[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }
 
 export default function AdminGalleryPage() {
@@ -42,7 +45,7 @@ export default function AdminGalleryPage() {
     refetch 
   } = api.gallery.getAllAdmin.useQuery(undefined, {
     staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
   const createGallery = api.gallery.create.useMutation({

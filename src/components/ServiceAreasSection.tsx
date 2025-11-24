@@ -54,7 +54,7 @@ export function ServiceAreasSection() {
                   {serviceArea.image ? (
                     <Image
                       src={serviceArea.image}
-                      alt={serviceArea.title}
+                      alt={serviceArea.name}
                       fill
                       className="object-cover"
                     />
@@ -77,10 +77,10 @@ export function ServiceAreasSection() {
                   )}
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-4 uppercase">
-                  {serviceArea.title}
+                  {serviceArea.name}
                 </h3>
                 <div className="text-left text-gray-700">
-                  <p className="whitespace-pre-wrap">{serviceArea.description}</p>
+                  <p className="text-center text-gray-500">Bu hizmet alanı hakkında açıklama henüz eklenmemiş.</p>
                 </div>
               </div>
             </div>
