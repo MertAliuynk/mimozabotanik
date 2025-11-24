@@ -1,6 +1,8 @@
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DB = any;
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure, protectedProcedure } from '../trpc';
-import { db } from '../../lib/db';
 
 export const serviceRouter = createTRPCRouter({
   // Get all published services
@@ -8,8 +10,9 @@ export const serviceRouter = createTRPCRouter({
     .input(z.object({
       published: z.boolean().optional().default(true),
     }))
-    .query(async ({ input }) => {
-      const services = await db.service.findMany({
+    .query(async ({ input, ctx }) => {
+      if (!ctx.db) return [];
+      const services = await (ctx.db as DB).service.findMany({
         where: {
           published: input.published,
         },
@@ -26,8 +29,9 @@ export const serviceRouter = createTRPCRouter({
   // Get service by ID
   getById: publicProcedure
     .input(z.string())
-    .query(async ({ input }) => {
-      const service = await db.service.findUnique({
+    .query(async ({ input, ctx }) => {
+      if (!ctx.db) return null;
+      const service = await (ctx.db as DB).service.findUnique({
         where: {
           id: input,
         },
@@ -41,12 +45,11 @@ export const serviceRouter = createTRPCRouter({
   // Admin: Get all services (including unpublished)
   getAllAdmin: protectedProcedure
     .query(async ({ ctx }) => {
-      // Check if user is admin
+      if (!ctx.db) return [];
       if (ctx.user.role !== 'ADMIN') {
         throw new Error('Unauthorized');
       }
-      
-      const services = await db.service.findMany({
+      const services = await (ctx.db as DB).service.findMany({
         include: {
           images: true,
         },
@@ -68,12 +71,11 @@ export const serviceRouter = createTRPCRouter({
       published: z.boolean().optional().default(true),
     }))
     .mutation(async ({ input, ctx }) => {
-      // Check if user is admin
+      if (!ctx.db) return null;
       if (ctx.user.role !== 'ADMIN') {
         throw new Error('Unauthorized');
       }
-      
-      const service = await db.service.create({
+      const service = await (ctx.db as DB).service.create({
         data: {
           title: input.title,
           description: input.description,
@@ -86,7 +88,6 @@ export const serviceRouter = createTRPCRouter({
           images: true,
         },
       });
-      
       return service;
     }),
 
@@ -102,14 +103,12 @@ export const serviceRouter = createTRPCRouter({
       published: z.boolean().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
-      // Check if user is admin
+      if (!ctx.db) return null;
       if (ctx.user.role !== 'ADMIN') {
         throw new Error('Unauthorized');
       }
-      
       const { id, ...updateData } = input;
-      
-      const service = await db.service.update({
+      const service = await (ctx.db as DB).service.update({
         where: {
           id,
         },
@@ -118,7 +117,6 @@ export const serviceRouter = createTRPCRouter({
           images: true,
         },
       });
-      
       return service;
     }),
 
@@ -126,17 +124,15 @@ export const serviceRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.string())
     .mutation(async ({ input, ctx }) => {
-      // Check if user is admin
+      if (!ctx.db) return { success: false };
       if (ctx.user.role !== 'ADMIN') {
         throw new Error('Unauthorized');
       }
-      
-      await db.service.delete({
+      await (ctx.db as DB).service.delete({
         where: {
           id: input,
         },
       });
-      
       return { success: true };
     }),
 
@@ -149,21 +145,18 @@ export const serviceRouter = createTRPCRouter({
       })),
     }))
     .mutation(async ({ input, ctx }) => {
-      // Check if user is admin
+      if (!ctx.db) return { success: false };
       if (ctx.user.role !== 'ADMIN') {
         throw new Error('Unauthorized');
       }
-      
-      // Update all service orders in a transaction
-      await db.$transaction(
+      await (ctx.db as DB).$transaction(
         input.services.map(service =>
-          db.service.update({
+          (ctx.db as DB).service.update({
             where: { id: service.id },
             data: { order: service.order },
           })
         )
       );
-      
       return { success: true };
     }),
 });

@@ -1,6 +1,8 @@
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DB = any;
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure, protectedProcedure } from '../trpc';
-import { db } from '../../lib/db';
 
 export const referenceRouter = createTRPCRouter({
   // Get all published references
@@ -8,8 +10,9 @@ export const referenceRouter = createTRPCRouter({
     .input(z.object({
       published: z.boolean().optional().default(true),
     }))
-    .query(async ({ input }) => {
-      const references = await db.reference.findMany({
+    .query(async ({ input, ctx }) => {
+      if (!ctx.db) return [];
+      const references = await (ctx.db as DB).reference.findMany({
         where: {
           published: input.published,
         },
@@ -23,8 +26,9 @@ export const referenceRouter = createTRPCRouter({
   // Get reference by ID
   getById: publicProcedure
     .input(z.string())
-    .query(async ({ input }) => {
-      const reference = await db.reference.findUnique({
+    .query(async ({ input, ctx }) => {
+      if (!ctx.db) return null;
+      const reference = await (ctx.db as DB).reference.findUnique({
         where: {
           id: input,
         },
@@ -35,12 +39,11 @@ export const referenceRouter = createTRPCRouter({
   // Admin: Get all references (including unpublished)
   getAllAdmin: protectedProcedure
     .query(async ({ ctx }) => {
-      // Check if user is admin
+      if (!ctx.db) return [];
       if (ctx.user?.role !== 'ADMIN') {
         throw new Error('Unauthorized');
       }
-      
-      const references = await db.reference.findMany({
+      const references = await (ctx.db as DB).reference.findMany({
         orderBy: {
           order: 'asc',
         },
@@ -59,12 +62,11 @@ export const referenceRouter = createTRPCRouter({
       published: z.boolean().optional().default(true),
     }))
     .mutation(async ({ input, ctx }) => {
-      // Check if user is admin
+      if (!ctx.db) return null;
       if (ctx.user?.role !== 'ADMIN') {
         throw new Error('Unauthorized');
       }
-      
-      const reference = await db.reference.create({
+      const reference = await (ctx.db as DB).reference.create({
         data: {
           companyName: input.companyName,
           logo: input.logo,
@@ -74,7 +76,6 @@ export const referenceRouter = createTRPCRouter({
           published: input.published,
         },
       });
-      
       return reference;
     }),
 
@@ -90,20 +91,17 @@ export const referenceRouter = createTRPCRouter({
       published: z.boolean().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
-      // Check if user is admin
+      if (!ctx.db) return null;
       if (ctx.user?.role !== 'ADMIN') {
         throw new Error('Unauthorized');
       }
-      
       const { id, ...updateData } = input;
-      
-      const reference = await db.reference.update({
+      const reference = await (ctx.db as DB).reference.update({
         where: {
           id,
         },
         data: updateData,
       });
-      
       return reference;
     }),
 
@@ -111,17 +109,15 @@ export const referenceRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.string())
     .mutation(async ({ input, ctx }) => {
-      // Check if user is admin
+      if (!ctx.db) return { success: false };
       if (ctx.user?.role !== 'ADMIN') {
         throw new Error('Unauthorized');
       }
-      
-      await db.reference.delete({
+      await (ctx.db as DB).reference.delete({
         where: {
           id: input,
         },
       });
-      
       return { success: true };
     }),
 
@@ -134,21 +130,18 @@ export const referenceRouter = createTRPCRouter({
       })),
     }))
     .mutation(async ({ input, ctx }) => {
-      // Check if user is admin
+      if (!ctx.db) return { success: false };
       if (ctx.user?.role !== 'ADMIN') {
         throw new Error('Unauthorized');
       }
-      
-      // Update all reference orders in a transaction
-      await db.$transaction(
+      await (ctx.db as DB).$transaction(
         input.references.map(reference =>
-          db.reference.update({
+          (ctx.db as DB).reference.update({
             where: { id: reference.id },
             data: { order: reference.order },
           })
         )
       );
-      
       return { success: true };
     }),
 });

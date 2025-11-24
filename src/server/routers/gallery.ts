@@ -1,6 +1,8 @@
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DB = any;
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure, protectedProcedure } from '../trpc';
-import { db } from '../../lib/db';
 
 export const galleryRouter = createTRPCRouter({
   // Get all published galleries with images
@@ -8,8 +10,9 @@ export const galleryRouter = createTRPCRouter({
     .input(z.object({
       published: z.boolean().optional().default(true),
     }))
-    .query(async ({ input }) => {
-      const galleries = await db.gallery.findMany({
+    .query(async ({ input, ctx }) => {
+      if (!ctx.db) return [];
+      const galleries = await (ctx.db as DB).gallery.findMany({
         where: {
           published: input.published,
         },
@@ -30,8 +33,9 @@ export const galleryRouter = createTRPCRouter({
   // Get gallery by ID with images
   getById: publicProcedure
     .input(z.string())
-    .query(async ({ input }) => {
-      const gallery = await db.gallery.findUnique({
+    .query(async ({ input, ctx }) => {
+      if (!ctx.db) return null;
+      const gallery = await (ctx.db as DB).gallery.findUnique({
         where: {
           id: input,
         },
@@ -49,12 +53,11 @@ export const galleryRouter = createTRPCRouter({
   // Admin: Get all galleries (including unpublished)
   getAllAdmin: protectedProcedure
     .query(async ({ ctx }) => {
-      // Check if user is admin
+      if (!ctx.db) return [];
       if (ctx.user?.role !== 'ADMIN') {
         throw new Error('Unauthorized');
       }
-      
-      const galleries = await db.gallery.findMany({
+      const galleries = await (ctx.db as DB).gallery.findMany({
         include: {
           images: {
             orderBy: {
@@ -83,14 +86,12 @@ export const galleryRouter = createTRPCRouter({
       })).optional(),
     }))
     .mutation(async ({ input, ctx }) => {
-      // Check if user is admin
+      if (!ctx.db) return null;
       if (ctx.user?.role !== 'ADMIN') {
         throw new Error('Unauthorized');
       }
-      
       const { images, ...galleryData } = input;
-      
-      const gallery = await db.gallery.create({
+      const gallery = await (ctx.db as DB).gallery.create({
         data: {
           ...galleryData,
           images: images ? {
@@ -109,7 +110,6 @@ export const galleryRouter = createTRPCRouter({
           },
         },
       });
-      
       return gallery;
     }),
 
@@ -123,14 +123,12 @@ export const galleryRouter = createTRPCRouter({
       published: z.boolean().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
-      // Check if user is admin
+      if (!ctx.db) return null;
       if (ctx.user?.role !== 'ADMIN') {
         throw new Error('Unauthorized');
       }
-      
       const { id, ...updateData } = input;
-      
-      const gallery = await db.gallery.update({
+      const gallery = await (ctx.db as DB).gallery.update({
         where: {
           id,
         },
@@ -143,7 +141,6 @@ export const galleryRouter = createTRPCRouter({
           },
         },
       });
-      
       return gallery;
     }),
 
@@ -151,17 +148,15 @@ export const galleryRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.string())
     .mutation(async ({ input, ctx }) => {
-      // Check if user is admin
+      if (!ctx.db) return { success: false };
       if (ctx.user?.role !== 'ADMIN') {
         throw new Error('Unauthorized');
       }
-      
-      await db.gallery.delete({
+      await (ctx.db as DB).gallery.delete({
         where: {
           id: input,
         },
       });
-      
       return { success: true };
     }),
 
@@ -174,12 +169,11 @@ export const galleryRouter = createTRPCRouter({
       order: z.number().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
-      // Check if user is admin
+      if (!ctx.db) return null;
       if (ctx.user?.role !== 'ADMIN') {
         throw new Error('Unauthorized');
       }
-      
-      const image = await db.galleryImage.create({
+      const image = await (ctx.db as DB).galleryImage.create({
         data: {
           galleryId: input.galleryId,
           url: input.url,
@@ -187,7 +181,6 @@ export const galleryRouter = createTRPCRouter({
           order: input.order ?? 0,
         },
       });
-      
       return image;
     }),
 
@@ -195,17 +188,15 @@ export const galleryRouter = createTRPCRouter({
   removeImage: protectedProcedure
     .input(z.string())
     .mutation(async ({ input, ctx }) => {
-      // Check if user is admin
+      if (!ctx.db) return { success: false };
       if (ctx.user?.role !== 'ADMIN') {
         throw new Error('Unauthorized');
       }
-      
-      await db.galleryImage.delete({
+      await (ctx.db as DB).galleryImage.delete({
         where: {
           id: input,
         },
       });
-      
       return { success: true };
     }),
 
@@ -218,21 +209,18 @@ export const galleryRouter = createTRPCRouter({
       })),
     }))
     .mutation(async ({ input, ctx }) => {
-      // Check if user is admin
+      if (!ctx.db) return { success: false };
       if (ctx.user?.role !== 'ADMIN') {
         throw new Error('Unauthorized');
       }
-      
-      // Update all gallery orders in a transaction
-      await db.$transaction(
+      await (ctx.db as DB).$transaction(
         input.galleries.map(gallery =>
-          db.gallery.update({
+          (ctx.db as DB).gallery.update({
             where: { id: gallery.id },
             data: { order: gallery.order },
           })
         )
       );
-      
       return { success: true };
     }),
 
@@ -245,21 +233,18 @@ export const galleryRouter = createTRPCRouter({
       })),
     }))
     .mutation(async ({ input, ctx }) => {
-      // Check if user is admin
+      if (!ctx.db) return { success: false };
       if (ctx.user?.role !== 'ADMIN') {
         throw new Error('Unauthorized');
       }
-      
-      // Update all image orders in a transaction
-      await db.$transaction(
+      await (ctx.db as DB).$transaction(
         input.images.map(image =>
-          db.galleryImage.update({
+          (ctx.db as DB).galleryImage.update({
             where: { id: image.id },
             data: { order: image.order },
           })
         )
       );
-      
       return { success: true };
     }),
 });
