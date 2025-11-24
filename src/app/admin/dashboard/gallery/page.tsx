@@ -83,7 +83,7 @@ export default function AdminGalleryPage() {
   );
 
   const filteredGalleries = galleries.filter(gallery => {
-    const matchesSearch = gallery.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (gallery.title ?? '').toLowerCase().includes((searchTerm ?? '').toLowerCase());
     const matchesFilter = filter === 'all' ||
                          (filter === 'published' && gallery.published) ||
                          (filter === 'draft' && !gallery.published);
