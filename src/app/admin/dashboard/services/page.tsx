@@ -78,7 +78,7 @@ export default function AdminServicesPage() {
   );
 
   // Filtered and searched services
-  const filteredServices = services.filter(service => {
+  const filteredServices = services.filter((service: Service) => {
     const matchesSearch = service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (service.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
     const matchesFilter = filter === 'all' ||
@@ -123,7 +123,7 @@ export default function AdminServicesPage() {
         description: '',
         image: '',
         category: '',
-        order: (services.length > 0 ? Math.max(...services.map(s => s.order)) + 1 : 1),
+        order: (services.length > 0 ? Math.max(...services.map((s: Service) => s.order)) + 1 : 1),
         published: true,
       });
     }
@@ -215,7 +215,7 @@ export default function AdminServicesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-            {filteredServices.map((service) => (
+            {filteredServices.map((service: Service) => (
               <div
                 key={service.id}
                 className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"

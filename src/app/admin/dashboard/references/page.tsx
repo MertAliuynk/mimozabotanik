@@ -76,7 +76,7 @@ export default function AdminReferencesPage() {
     []
   );
 
-  const filteredReferences = references.filter(reference => {
+  const filteredReferences = references.filter((reference: Reference) => {
     const matchesSearch = reference.companyName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filter === 'all' ||
                          (filter === 'published' && reference.published) ||
@@ -120,7 +120,7 @@ export default function AdminReferencesPage() {
         logo: '',
         description: '',
         website: '',
-        order: (references.length > 0 ? Math.max(...references.map(r => r.order)) + 1 : 1),
+        order: (references.length > 0 ? Math.max(...references.map((r: Reference) => r.order)) + 1 : 1),
         published: true,
       });
     }
@@ -210,7 +210,7 @@ export default function AdminReferencesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
-            {filteredReferences.map((reference) => (
+            {filteredReferences.map((reference : Reference) => (
               <div
                 key={reference.id}
                 className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
