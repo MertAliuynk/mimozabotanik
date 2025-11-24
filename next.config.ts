@@ -25,8 +25,8 @@ const nextConfig: NextConfig = {
     unoptimized: process.env.NODE_ENV === 'development',
   },
   experimental: {
-    // Allow localhost images in development
-    allowedInternalImagePrefixes: ['http://localhost:9000'],
+    // React Compiler enabled
+    reactCompiler: true,
   },
 };
 
