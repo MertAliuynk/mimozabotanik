@@ -8,8 +8,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,5 +21,58 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+/* Prose styles for blog content */
+.prose {
+  @apply text-gray-700 leading-relaxed max-w-none;
+}
+
+.prose h1 {
+  @apply text-3xl font-bold text-gray-900 mt-8 mb-4 first:mt-0;
+}
+
+.prose h2 {
+  @apply text-2xl font-semibold text-gray-900 mt-6 mb-3;
+}
+
+.prose h3 {
+  @apply text-xl font-semibold text-gray-900 mt-5 mb-2;
+}
+
+.prose p {
+  @apply mb-4;
+}
+
+.prose a {
+  @apply text-blue-600 hover:text-blue-800 underline decoration-blue-300 hover:decoration-blue-500 transition-colors;
+}
+
+.prose img {
+  @apply rounded-lg shadow-md my-6 w-full h-auto;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-gray-300 pl-4 italic text-gray-600 my-6 bg-gray-50 py-2 rounded-r;
+}
+
+.prose ul, .prose ol {
+  @apply my-4 ml-6;
+}
+
+.prose li {
+  @apply mb-2;
+}
+
+.prose code {
+  @apply bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm font-mono;
+}
+
+.prose pre {
+  @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4 border;
+}
+
+.prose pre code {
+  @apply bg-transparent text-gray-100 p-0;
 }
