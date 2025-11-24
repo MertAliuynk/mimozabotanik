@@ -1,5 +1,6 @@
 'use client';
 
+import { Service } from '@/generated/prisma/wasm';
 import { api } from '../utils/providers';
 import Image from 'next/image';
 
@@ -51,7 +52,7 @@ export function DynamicServicesGrid() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Services Grid - 4 columns to match screenshot */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {services.map((service) => (
+          {services.map((service : Service) => (
             <div key={service.id} className="group cursor-pointer">
               <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
                 {/* Service Image */}

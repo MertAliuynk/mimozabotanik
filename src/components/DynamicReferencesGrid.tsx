@@ -1,5 +1,6 @@
 'use client';
 
+import { Reference } from '@/generated/prisma/wasm';
 import { api } from '../utils/providers';
 import Image from 'next/image';
 
@@ -51,7 +52,7 @@ export function DynamicReferencesGrid() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* References Grid - Responsive layout to match screenshot */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {references.map((reference) => (
+          {references.map((reference : Reference ) => (
             <div key={reference.id} className="group cursor-pointer">
               <div className="bg-white rounded-lg p-8 flex flex-col items-center justify-center min-h-[200px] hover:shadow-lg transition-shadow duration-300">
                 {/* Company Logo */}
