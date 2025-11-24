@@ -97,7 +97,7 @@ export default function AdminBlogPage() {
     []
   );
 
-  const filteredPosts = posts.filter(post => {
+  const filteredPosts = posts.filter((post: Post) => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (post.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
     const matchesFilter = filter === 'all' ||
@@ -272,7 +272,7 @@ export default function AdminBlogPage() {
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
-            {filteredPosts.map((post) => (
+            {filteredPosts.map((post: Post) => (
               <div key={post.id} className="p-6 hover:bg-gray-50 transition-colors">
                 <div className="flex items-start gap-4">
                   {/* Featured Image */}
@@ -443,7 +443,7 @@ export default function AdminBlogPage() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                       >
                         <option value="">Kategori seçin</option>
-                        {categories.map((category) => (
+                        {categories.map((category: Category) => (
                           <option key={category.id} value={category.id}>
                             {category.name}
                           </option>

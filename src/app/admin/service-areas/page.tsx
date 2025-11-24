@@ -11,9 +11,19 @@ interface ServiceAreaFormData {
   published: boolean;
 }
 
+interface ServiceArea {
+  id: string;
+  name: string;
+  image: string | null;
+  order: number;
+  published: boolean;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
 export default function ServiceAreasAdmin() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editingArea, setEditingArea] = useState<any>(null);
+  const [editingArea, setEditingArea] = useState<ServiceArea | null>(null);
   const [formData, setFormData] = useState<ServiceAreaFormData>({
     name: '',
     image: '',
@@ -128,11 +138,11 @@ export default function ServiceAreasAdmin() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {serviceAreas?.map((area) => (
+                {serviceAreas?.map((area: ServiceArea) => (
                   <tr key={area.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <img
-                        src={area.image}
+                        src={area.image || '/placeholder.jpg'}
                         alt={area.name}
                         className="w-16 h-16 object-cover rounded"
                       />

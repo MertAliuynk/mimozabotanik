@@ -1,6 +1,15 @@
 import { initTRPC, TRPCError } from '@trpc/server';
 import { ZodError } from 'zod';
-import { db } from '../lib/db';
+
+// Only import db at runtime, not during build
+let db: any = null;
+if (process.env.NODE_ENV !== 'production' || process.env.DATABASE_URL) {
+  try {
+    db = require('../lib/db').db;
+  } catch (error) {
+    console.warn('Database not available during build:', error);
+  }
+}
 
 type CreateContextOptions = {
   user: any | null;

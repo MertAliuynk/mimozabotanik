@@ -6,6 +6,40 @@ import { Calendar, User, ArrowRight, Heart } from 'lucide-react';
 import { formatDate } from '../utils/helpers';
 import { Button } from './ui/Button';
 
+interface PostImage {
+  id: string;
+  url: string;
+  alt?: string;
+}
+
+interface Author {
+  id: string;
+  name?: string | null;
+  avatar?: string | null;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  color?: string;
+}
+
+interface Post {
+  id: string;
+  title: string;
+  description?: string | null;
+  content?: string | null;
+  slug: string;
+  published: boolean;
+  featured: boolean;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  author: Author;
+  category?: Category | null;
+  images?: PostImage[];
+  _count?: { images: number };
+}
+
 export function FeaturedPosts() {
   const { data: posts, isLoading } = api.post.getFeatured.useQuery({ limit: 6 });
 
@@ -52,7 +86,7 @@ export function FeaturedPosts() {
         {posts && posts.length > 0 ? (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-              {posts.map((post) => (
+              {posts.map((post: Post) => (
                 <article key={post.id} className="group cursor-pointer">
                   <Link href={`/blog/${post.slug}`}>
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 group-hover:shadow-xl group-hover:scale-105">

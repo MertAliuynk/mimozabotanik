@@ -4,6 +4,10 @@ import { type NextRequest } from 'next/server';
 import { appRouter } from '../../../../server/root';
 import { createTRPCContext } from '../../../../server/trpc';
 
+// Prevent Next.js from trying to statically analyze this route during build
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 const handler = (req: NextRequest) =>
   fetchRequestHandler({
     endpoint: '/api/trpc',

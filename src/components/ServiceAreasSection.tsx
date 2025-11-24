@@ -2,6 +2,16 @@
 import { api } from '../utils/api';
 import Image from 'next/image';
 
+interface ServiceArea {
+  id: string;
+  name: string;
+  image: string | null;
+  order: number;
+  published: boolean;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
 export function ServiceAreasSection() {
   const { data: serviceAreas, isLoading } = api.serviceArea.getAll.useQuery();
 
@@ -47,7 +57,7 @@ export function ServiceAreasSection() {
         
         {/* Service areas grid - dynamic from admin panel */}
         <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {serviceAreas?.map((serviceArea, index) => (
+          {serviceAreas?.map((serviceArea: ServiceArea, index: number) => (
             <div key={serviceArea.id} className="text-center">
               <div className="bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <div className="relative h-48 mb-6 overflow-hidden rounded-lg">

@@ -4,6 +4,38 @@ import { useState } from 'react';
 import { api } from '../utils/providers';
 import { BlogPostCard } from './BlogPostCard';
 
+interface Category {
+  id: string;
+  name: string;
+  slug?: string;
+  color?: string;
+}
+
+interface PostImage {
+  id: string;
+  url: string;
+  alt?: string;
+}
+
+interface Author {
+  id: string;
+  name: string | null;
+  avatar?: string | null;
+}
+
+interface Post {
+  id: string;
+  title: string;
+  description: string | null;
+  content: string | null;
+  slug: string;
+  published: boolean;
+  images: PostImage[];
+  category?: Category | null;
+  author?: Author;
+  createdAt: Date | string;
+}
+
 export function DynamicBlogGrid() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
@@ -69,7 +101,7 @@ export function DynamicBlogGrid() {
               >
                 Tümü
               </button>
-              {categories.map((category) => (
+              {categories?.map((category: Category) => (
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
@@ -91,29 +123,37 @@ export function DynamicBlogGrid() {
         
         {/* Blog Posts Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {posts.posts.map((post) => (
+          {posts?.posts?.map((post: Post) => (
             <BlogPostCard 
               key={post.id} 
               post={{
                 ...post,
+                featured: false, // varsayılan değer
+                updatedAt: typeof post.createdAt === 'string' ? post.createdAt : post.createdAt.toString(),
+                createdAt: typeof post.createdAt === 'string' ? post.createdAt : post.createdAt.toString(),
                 description: post.description,
                 content: post.content,
-                images: post.images.map(img => ({
+                images: post.images?.map((img: PostImage) => ({
                   id: img.id,
                   url: img.url,
                   alt: img.alt || undefined
-                })),
-                author: {
+                })) || [],
+                author: post.author ? {
                   id: post.author.id,
                   name: post.author.name,
                   email: undefined,
                   avatar: post.author.avatar
+                } : {
+                  id: 'unknown',
+                  name: 'Bilinmeyen Yazar',
+                  email: undefined,
+                  avatar: undefined
                 },
                 category: post.category ? {
                   id: post.category.id,
                   name: post.category.name,
-                  slug: post.category.slug,
-                  color: post.category.color
+                  slug: post.category.slug || post.category.id,
+                  color: post.category.color || '#gray'
                 } : null
               }}
             />

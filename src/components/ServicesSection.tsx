@@ -2,6 +2,16 @@
 
 import { api } from '../utils/api';
 
+interface ServiceArea {
+  id: string;
+  name: string;
+  image: string | null;
+  order: number;
+  published: boolean;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
 export function ServicesSection() {
   const { data: serviceAreas, isLoading } = api.serviceArea.getAll.useQuery();
 
@@ -63,7 +73,7 @@ export function ServicesSection() {
         {rows.map((row, rowIndex) => (
           <div key={rowIndex}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-              {row.map((serviceArea) => (
+              {row.map((serviceArea: ServiceArea) => (
                 <div key={serviceArea.id} className="text-center group cursor-pointer">
                   <div className="aspect-square overflow-hidden rounded-lg mb-4 shadow-lg">
                     <img 
