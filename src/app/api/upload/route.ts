@@ -3,6 +3,14 @@ import { minioClient, ensureBucketExists } from '../../../lib/minio';
 
 export async function POST(request: NextRequest) {
   try {
+    // Skip MinIO connection in build/deploy phase
+    if (process.env.NODE_ENV === 'production' && !process.env.MINIO_ENDPOINT) {
+      return NextResponse.json(
+        { error: 'Upload service not configured' },
+        { status: 503 }
+      );
+    }
+    
     const formData = await request.formData();
     const file = formData.get('file') as File;
     
@@ -43,6 +51,10 @@ export async function POST(request: NextRequest) {
     await ensureBucketExists(bucketName);
     
     // Upload to Minio
+    if (!minioClient) {
+      throw new Error('MinIO not configured');
+    }
+    
     await minioClient.putObject(bucketName, fileName, buffer, file.size, {
       'Content-Type': file.type,
     });
