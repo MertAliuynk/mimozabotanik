@@ -39,14 +39,15 @@ export default function AdminGalleryPage() {
   const [filter, setFilter] = useState<'all' | 'published' | 'draft'>('all');
 
   // tRPC Queries
-  const { 
-    data: galleries = [], 
-    isLoading, 
-    refetch 
-  } = api.gallery.getAllAdmin.useQuery(undefined, {
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-  });
+ const { 
+  data: galleries = [], 
+  isLoading, 
+  refetch 
+} = api.gallery.getAllAdmin.useQuery(undefined, {
+  staleTime: 5 * 60 * 1000,
+  gcTime: 10 * 60 * 1000,
+  enabled: typeof window !== 'undefined', // SSR sırasında sorguyu kapat
+});
 
   const createGallery = api.gallery.create.useMutation({
     onSuccess: () => {
@@ -82,14 +83,16 @@ export default function AdminGalleryPage() {
     []
   );
 
-  const filteredGalleries = galleries.filter(gallery => {
-    const matchesSearch = (gallery.title ?? '').toLowerCase().includes((searchTerm ?? '').toLowerCase());
-    const matchesFilter = filter === 'all' ||
-                         (filter === 'published' && gallery.published) ||
-                         (filter === 'draft' && !gallery.published);
-    return matchesSearch && matchesFilter;
-  });
+  const safeGalleries = Array.isArray(galleries) ? galleries : [];
 
+const filteredGalleries = safeGalleries.filter(gallery => {
+  const matchesSearch = (gallery.title ?? '').toLowerCase().includes((searchTerm ?? '').toLowerCase());
+  const matchesFilter = filter === 'all' ||
+                       (filter === 'published' && gallery.published) ||
+                       (filter === 'draft' && !gallery.published);
+  return matchesSearch && matchesFilter;
+});
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -135,7 +138,7 @@ export default function AdminGalleryPage() {
       setFormData({
         title: '',
         description: '',
-        order: (galleries.length > 0 ? Math.max(...galleries.map(g => g.order)) + 1 : 1),
+        order: (galleries.length > 0 ? Math.max(...galleries.map((g: Gallery) => g.order)) + 1 : 1),
         published: true,
         images: [],
       });
@@ -240,7 +243,7 @@ export default function AdminGalleryPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-            {filteredGalleries.map((gallery) => (
+            {filteredGalleries.map((gallery: Gallery) => (
               <div
                 key={gallery.id}
                 className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
