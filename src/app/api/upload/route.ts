@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { minioClient, ensureBucketExists } from '../../../lib/minio';
 
+// Skip this route during build if MinIO is not available
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     // Skip MinIO connection in build/deploy phase
