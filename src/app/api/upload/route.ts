@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { minioClient, ensureBucketExists } from '../../../lib/minio';
 
 // Skip this route during build if MinIO is not available
 export const runtime = 'nodejs';
@@ -14,6 +13,9 @@ export async function POST(request: NextRequest) {
         { status: 503 }
       );
     }
+
+    // Import MinIO only at runtime
+    const { minioClient, ensureBucketExists } = await import('../../../lib/minio');
     
     const formData = await request.formData();
     const file = formData.get('file') as File;
