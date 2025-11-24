@@ -47,6 +47,13 @@ export const uploadRouter = createTRPCRouter({
       const uniqueFilename = `${Date.now()}-${generateRandomString(8)}.${extension}`;
 
       try {
+        if (!minioClient) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'MinIO service not configured',
+          });
+        }
+
         // Presigned URL oluştur
         const presignedUrl = await minioClient.presignedPutObject(
           bucketName,
@@ -145,10 +152,12 @@ export const uploadRouter = createTRPCRouter({
 
       try {
         // Minio'dan sil
-        await minioClient.removeObject(
-          process.env.MINIO_BUCKET_NAME!,
-          image.filename
-        );
+        if (minioClient) {
+          await minioClient.removeObject(
+            process.env.MINIO_BUCKET_NAME!,
+            image.filename
+          );
+        }
       } catch (error) {
         console.error('Minio delete error:', error);
       }
