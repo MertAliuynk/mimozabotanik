@@ -32,7 +32,7 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
   };
 };
 
-export const createTRPCContext = async (opts: { req: Request }) => {
+export const createTRPCContext = (opts: { req: Request }) => {
   // Skip context creation during build time
   if (!db) {
     return {
