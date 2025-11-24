@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DB = any;
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { createTRPCRouter, publicProcedure, protectedProcedure } from '../trpc';
@@ -6,7 +8,8 @@ import { generateSlug } from '../../utils/helpers';
 
 export const categoryRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
-    const categories = await ctx.db.category.findMany({
+    if (!ctx.db) return [];
+    const categories = await (ctx.db as DB).category.findMany({
       include: {
         _count: {
           select: {
@@ -25,7 +28,8 @@ export const categoryRouter = createTRPCRouter({
   getBySlug: publicProcedure
     .input(z.object({ slug: z.string() }))
     .query(async ({ input, ctx }) => {
-      const category = await ctx.db.category.findUnique({
+      if (!ctx.db) return null;
+      const category = await (ctx.db as DB).category.findUnique({
         where: { slug: input.slug },
         include: {
           posts: {
@@ -69,7 +73,8 @@ export const categoryRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const slug = generateSlug(input.name);
 
-      const existingCategory = await ctx.db.category.findFirst({
+      if (!ctx.db) return null;
+      const existingCategory = await (ctx.db as DB).category.findFirst({
         where: {
           OR: [
             { name: input.name },
@@ -85,7 +90,7 @@ export const categoryRouter = createTRPCRouter({
         });
       }
 
-      const category = await ctx.db.category.create({
+      const category = await (ctx.db as DB).category.create({
         data: {
           ...input,
           slug,
@@ -109,7 +114,7 @@ export const categoryRouter = createTRPCRouter({
       if (updateData.name) {
         slug = generateSlug(updateData.name);
         
-        const existingCategory = await ctx.db.category.findFirst({
+        const existingCategory = await (ctx.db as DB).category.findFirst({
           where: {
             OR: [
               { name: updateData.name },
@@ -127,7 +132,8 @@ export const categoryRouter = createTRPCRouter({
         }
       }
 
-      const category = await ctx.db.category.update({
+      if (!ctx.db) return null;
+      const category = await (ctx.db as DB).category.update({
         where: { id },
         data: {
           ...updateData,
@@ -143,7 +149,8 @@ export const categoryRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { id } = input;
 
-      const category = await ctx.db.category.findUnique({
+      if (!ctx.db) return null;
+      const category = await (ctx.db as DB).category.findUnique({
         where: { id },
         include: {
           _count: {
@@ -168,7 +175,7 @@ export const categoryRouter = createTRPCRouter({
         });
       }
 
-      await ctx.db.category.delete({
+      await (ctx.db as DB).category.delete({
         where: { id },
       });
 

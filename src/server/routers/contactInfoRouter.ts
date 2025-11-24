@@ -1,10 +1,35 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DB = any;
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure, adminProcedure } from '../trpc';
 
 export const contactInfoRouter = createTRPCRouter({
   // Get contact info (public)
   get: publicProcedure.query(async ({ ctx }) => {
-    const contactInfo = await ctx.db.contactInfo.findFirst();
+    if (!ctx.db) {
+      // Build sırasında mock veri döndür
+      return {
+        id: '',
+        companyName: 'GreenPark Peyzaj',
+        address: 'Kızılırmak Mah. Dumlupınar Blv. Next Level Plaza 3A/11 Çankaya/Ankara',
+        phone: '(+90) 552 355 75 06',
+        email: 'o.yesiltas@greenparkpeyzaj.com',
+        latitude: 39.9334,
+        longitude: 32.8157,
+        workingHours: {
+          monday: { open: '09:00', close: '18:00', isOpen: true },
+          tuesday: { open: '09:00', close: '18:00', isOpen: true },
+          wednesday: { open: '09:00', close: '18:00', isOpen: true },
+          thursday: { open: '09:00', close: '18:00', isOpen: true },
+          friday: { open: '09:00', close: '18:00', isOpen: true },
+          saturday: { open: '09:00', close: '16:00', isOpen: true },
+          sunday: { open: '00:00', close: '00:00', isOpen: false }
+        },
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+    }
+    const contactInfo = await (ctx.db as DB).contactInfo.findFirst();
     
     // If no contact info exists, return default values
     if (!contactInfo) {
@@ -56,15 +81,16 @@ export const contactInfoRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       // Check if contact info exists
-      const existing = await ctx.db.contactInfo.findFirst();
+      if (!ctx.db) return null;
+      const existing = await (ctx.db as DB).contactInfo.findFirst();
       
       if (existing) {
-        return ctx.db.contactInfo.update({
+        return (ctx.db as DB).contactInfo.update({
           where: { id: existing.id },
           data: input
         });
       } else {
-        return ctx.db.contactInfo.create({
+        return (ctx.db as DB).contactInfo.create({
           data: input
         });
       }
@@ -72,7 +98,11 @@ export const contactInfoRouter = createTRPCRouter({
 
   // Get Google Maps embed URL
   getMapUrl: publicProcedure.query(async ({ ctx }) => {
-    const contactInfo = await ctx.db.contactInfo.findFirst();
+    if (!ctx.db) {
+      // Default Ankara location
+      return `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3059.123!2d32.8157!3d39.9334!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2z!5e0!3m2!1str!2str!4v1700000000000!5m2!1str!2str`;
+    }
+    const contactInfo = await (ctx.db as DB).contactInfo.findFirst();
     
     if (!contactInfo) {
       // Default Ankara location
