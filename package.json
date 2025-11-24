@@ -23,7 +23,6 @@
     "@trpc/server": "^11.7.1",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.3",
-    "loadash": "^1.0.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.554.0",
     "minio": "^8.0.6",
