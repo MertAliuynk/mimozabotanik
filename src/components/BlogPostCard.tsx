@@ -6,22 +6,25 @@ import Image from 'next/image';
 interface BlogPost {
   id: string;
   title: string;
-  content: string;
-  description?: string;
+  content: string | null;
+  description?: string | null;
   slug: string;
   published: boolean;
   featured: boolean;
   createdAt: string;
   updatedAt: string;
   author: {
-    name?: string;
-    email: string;
+    id: string;
+    name?: string | null;
+    email?: string;
+    avatar?: string | null;
   };
   category?: {
+    id: string;
     name: string;
     slug: string;
     color: string;
-  };
+  } | null;
   images: {
     id: string;
     url: string;
@@ -67,7 +70,7 @@ export function BlogPostCard({ post }: BlogPostCardProps) {
               className="object-cover transition-transform duration-300 hover:scale-105"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
+            <div className="w-full h-full bg-linear-to-br from-green-100 to-green-200 flex items-center justify-center">
               <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center">
                 <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
@@ -103,7 +106,7 @@ export function BlogPostCard({ post }: BlogPostCardProps) {
           
           {/* Post Description/Excerpt */}
           <div className="text-gray-700 mb-4 line-clamp-3">
-            {post.description || createExcerpt(post.content)}
+            {post.description || (post.content ? createExcerpt(post.content) : '')}
           </div>
           
           {/* Post Meta */}

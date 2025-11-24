@@ -24,10 +24,6 @@ const nextConfig: NextConfig = {
     // Allow localhost and private IPs for development
     unoptimized: process.env.NODE_ENV === 'development',
   },
-  experimental: {
-    // React Compiler enabled
-    reactCompiler: true,
-  },
 };
 
 export default nextConfig;

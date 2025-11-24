@@ -13,12 +13,13 @@ export function generateSlug(text: string): string {
     .replace(/-+/g, '-');
 }
 
-export function formatDate(date: Date): string {
+export function formatDate(date: Date | string): string {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
   return new Intl.DateTimeFormat('tr-TR', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  }).format(date);
+  }).format(dateObj);
 }
 
 export function formatFileSize(bytes: number): string {

@@ -153,7 +153,7 @@ export const postRouter = createTRPCRouter({
         data: {
           ...input,
           slug: finalSlug,
-          authorId: ctx.session.user.id,
+          authorId: ctx.user.id,
           tags: input.tagIds ? {
             connect: input.tagIds.map((id) => ({ id })),
           } : undefined,
@@ -193,7 +193,7 @@ export const postRouter = createTRPCRouter({
         });
       }
 
-      if (existingPost.authorId !== ctx.session.user.id) {
+      if (existingPost.authorId !== ctx.user.id) {
         throw new TRPCError({
           code: 'FORBIDDEN',
           message: 'Bu işlem için yetkiniz yok',
@@ -258,7 +258,7 @@ export const postRouter = createTRPCRouter({
         });
       }
 
-      if (existingPost.authorId !== ctx.session.user.id) {
+      if (existingPost.authorId !== ctx.user.id) {
         throw new TRPCError({
           code: 'FORBIDDEN',
           message: 'Bu işlem için yetkiniz yok',

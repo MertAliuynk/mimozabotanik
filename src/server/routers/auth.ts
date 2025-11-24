@@ -47,7 +47,7 @@ export const authRouter = createTRPCRouter({
 
   getMe: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.db.user.findUnique({
-      where: { id: ctx.session.user.id },
+      where: { id: ctx.user.id },
       select: {
         id: true,
         name: true,
@@ -78,7 +78,7 @@ export const authRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const user = await ctx.db.user.update({
-        where: { id: ctx.session.user.id },
+        where: { id: ctx.user.id },
         data: input,
         select: {
           id: true,

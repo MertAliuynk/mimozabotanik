@@ -9,7 +9,7 @@ interface BlogPostDetailProps {
 }
 
 export function BlogPostDetail({ slug }: BlogPostDetailProps) {
-  const { data: post, isLoading, error } = api.post.getBySlug.useQuery(slug);
+  const { data: post, isLoading, error } = api.post.getBySlug.useQuery({ slug });
 
   if (isLoading) {
     return (
@@ -155,7 +155,7 @@ export function BlogPostDetail({ slug }: BlogPostDetailProps) {
           prose-pre:bg-gray-900 prose-pre:text-gray-100
           prose-a:text-green-600 prose-a:no-underline hover:prose-a:text-green-700 hover:prose-a:underline
         "
-        dangerouslySetInnerHTML={{ __html: post.content }}
+        dangerouslySetInnerHTML={{ __html: post.content || '' }}
       />
       
       {/* Back to Blog Button */}

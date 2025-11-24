@@ -9,7 +9,7 @@ export function DynamicBlogGrid() {
   
   const { data: posts, isLoading: postsLoading, error: postsError } = api.post.getAll.useQuery({
     published: true,
-    categoryId: selectedCategory,
+    categoryId: selectedCategory || undefined,
   });
   
   const { data: categories, isLoading: categoriesLoading } = api.category.getAll.useQuery();
@@ -40,7 +40,7 @@ export function DynamicBlogGrid() {
     );
   }
 
-  if (!posts || posts.length === 0) {
+  if (!posts?.posts || posts.posts.length === 0) {
     return (
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -91,8 +91,32 @@ export function DynamicBlogGrid() {
         
         {/* Blog Posts Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {posts.map((post) => (
-            <BlogPostCard key={post.id} post={post} />
+          {posts.posts.map((post) => (
+            <BlogPostCard 
+              key={post.id} 
+              post={{
+                ...post,
+                description: post.description,
+                content: post.content,
+                images: post.images.map(img => ({
+                  id: img.id,
+                  url: img.url,
+                  alt: img.alt || undefined
+                })),
+                author: {
+                  id: post.author.id,
+                  name: post.author.name,
+                  email: undefined,
+                  avatar: post.author.avatar
+                },
+                category: post.category ? {
+                  id: post.category.id,
+                  name: post.category.name,
+                  slug: post.category.slug,
+                  color: post.category.color
+                } : null
+              }}
+            />
           ))}
         </div>
         

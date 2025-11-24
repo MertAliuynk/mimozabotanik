@@ -14,8 +14,8 @@ interface Service {
   category: string | null;
   order: number;
   published: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }
 
 export default function AdminServicesPage() {

@@ -1,11 +1,11 @@
-import { type NextAuthOptions } from 'next-auth';
+import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { compare } from 'bcryptjs';
 import { db } from '../lib/db';
 
-export const authOptions: NextAuthOptions = {
+export const authOptions = {
   session: {
-    strategy: 'jwt',
+    strategy: 'jwt' as const,
   },
   providers: [
     CredentialsProvider({
@@ -18,14 +18,14 @@ export const authOptions: NextAuthOptions = {
         },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials) {
+      async authorize(credentials: any) {
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
 
         const user = await db.user.findUnique({
           where: {
-            email: credentials.email,
+            email: credentials.email as string,
           },
         });
 
@@ -34,7 +34,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         const isPasswordValid = await compare(
-          credentials.password,
+          credentials.password as string,
           user.password
         );
 
@@ -53,7 +53,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    session: ({ session, token }) => {
+    session: ({ session, token }: { session: any; token: any }) => {
       return {
         ...session,
         user: {
@@ -63,7 +63,7 @@ export const authOptions: NextAuthOptions = {
         },
       };
     },
-    jwt: ({ token, user }) => {
+    jwt: ({ token, user }: { token: any; user: any }) => {
       if (user) {
         const u = user as unknown as any;
         return {
@@ -76,3 +76,5 @@ export const authOptions: NextAuthOptions = {
     },
   },
 };
+
+export const { handlers: { GET, POST }, auth } = NextAuth(authOptions);

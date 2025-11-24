@@ -52,7 +52,17 @@ export function DynamicGalleryGrid() {
         {/* Gallery Grid - 2 columns like screenshot */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {galleries.map((gallery) => (
-            <GalleryCard key={gallery.id} gallery={gallery} />
+            <GalleryCard 
+              key={gallery.id} 
+              gallery={{
+                ...gallery,
+                description: gallery.description || undefined,
+                images: gallery.images.map(img => ({
+                  ...img,
+                  alt: img.alt || undefined
+                }))
+              }} 
+            />
           ))}
         </div>
         
