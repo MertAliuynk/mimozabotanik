@@ -2,7 +2,24 @@
 
 import { api } from '../utils/providers';
 import { GalleryCard } from './GalleryCard';
-
+interface Gallery {
+  id: string;
+  title: string;
+  description: string | null;
+  order: number;
+  published: boolean;
+  images: {
+    id: string;
+    url: string;
+    alt: string | null;
+    order: number;
+    createdAt: string;
+    updatedAt: string;
+    galleryId: string;
+  }[];
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
 export function DynamicGalleryGrid() {
   const { data: galleries, isLoading, error } = api.gallery.getAll.useQuery({
     published: true
@@ -51,15 +68,15 @@ export function DynamicGalleryGrid() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Gallery Grid - 2 columns like screenshot */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {galleries.map((gallery) => (
+          {galleries.map((gallery : Gallery) => (
             <GalleryCard 
               key={gallery.id} 
               gallery={{
                 ...gallery,
                 description: gallery.description || undefined,
-                images: gallery.images.map(img => ({
+                images: gallery.images.map((img) => ({
                   ...img,
-                  alt: img.alt || undefined
+                  alt: img.alt ?? undefined
                 }))
               }} 
             />
