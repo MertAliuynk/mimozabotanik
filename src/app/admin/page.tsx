@@ -18,7 +18,7 @@ export default function AdminLoginPage() {
     try {
       // Admin login logic will be implemented here
       // For now, simple check
-      if (credentials.email === 'admin@greenparkpeyzaj.com' && credentials.password === 'admin123') {
+      if (credentials.email === 'mimozacicekcilik@gmail.com' && credentials.password === 'admin123') {
         localStorage.setItem('adminAuth', 'true');
         // Set cookie for server-side authentication
         document.cookie = 'admin-session=true; path=/; max-age=86400'; // 24 hours
