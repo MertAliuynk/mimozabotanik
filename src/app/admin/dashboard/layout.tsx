@@ -52,6 +52,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { name: 'Referanslar', href: '/admin/dashboard/references', icon: 'references' },
     { name: 'Galeri', href: '/admin/dashboard/gallery', icon: 'gallery' },
     { name: 'Blog', href: '/admin/dashboard/blog', icon: 'blog' },
+    { name: 'urunler', href: '/admin/dashboard/urunler', icon: 'blog' },
+    { name: 'siparisler', href: '/admin/dashboard/siparisler', icon: 'blog' },
+    
   ];
 
   const getIcon = (iconName: string) => {

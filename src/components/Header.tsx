@@ -59,6 +59,9 @@ export function Header() {
               <Link href="/blog" className={pathname === '/blog' ? 'bg-gray-800 text-white px-4 py-2 hover:bg-gray-700 transition-colors' : 'text-gray-700 hover:text-green-600 transition-colors border-b-2 border-transparent hover:border-green-600 pb-1'}>
                 Blog
               </Link>
+                <Link href="/urunler" className={pathname === '/urunler' ? 'bg-gray-800 text-white px-4 py-2 hover:bg-gray-700 transition-colors' : 'text-gray-700 hover:text-green-600 transition-colors border-b-2 border-transparent hover:border-green-600 pb-1'}>
+                  Ürünler
+                </Link>
               <Link href="/iletisim" className={pathname === '/iletisim' ? 'bg-gray-800 text-white px-4 py-2 hover:bg-gray-700 transition-colors' : 'text-gray-700 hover:text-green-600 transition-colors border-b-2 border-transparent hover:border-green-600 pb-1'}>
                 İletişim
               </Link>
@@ -88,6 +91,7 @@ export function Header() {
                 <Link href="/referanslarimiz" className={pathname === '/referanslarimiz' ? 'bg-gray-800 text-white px-4 py-2' : 'text-gray-700 px-4 py-2 hover:bg-gray-100'} onClick={() => setIsMenuOpen(false)}>Referanslarımız</Link>
                 <Link href="/galeri" className={pathname === '/galeri' ? 'bg-gray-800 text-white px-4 py-2' : 'text-gray-700 px-4 py-2 hover:bg-gray-100'} onClick={() => setIsMenuOpen(false)}>Galeri</Link>
                 <Link href="/blog" className={pathname === '/blog' ? 'bg-gray-800 text-white px-4 py-2' : 'text-gray-700 px-4 py-2 hover:bg-gray-100'} onClick={() => setIsMenuOpen(false)}>Blog</Link>
+                  <Link href="/urunler" className={pathname === '/urunler' ? 'bg-gray-800 text-white px-4 py-2' : 'text-gray-700 px-4 py-2 hover:bg-gray-100'} onClick={() => setIsMenuOpen(false)}>Ürünler</Link>
                 <Link href="/iletisim" className={pathname === '/iletisim' ? 'bg-gray-800 text-white px-4 py-2' : 'text-gray-700 px-4 py-2 hover:bg-gray-100'} onClick={() => setIsMenuOpen(false)}>İletişim</Link>
               </div>
             </div>

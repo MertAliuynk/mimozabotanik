@@ -8,8 +8,12 @@ import { referenceRouter } from './routers/reference';
 import { galleryRouter } from './routers/gallery';
 import { serviceAreaRouter } from './routers/serviceAreaRouter';
 import { contactInfoRouter } from './routers/contactInfoRouter';
+import { productRouter } from './routers/product';
+import { orderRouter } from './routers/order';
 
 export const appRouter = createTRPCRouter({
+  order: orderRouter,
+  product: productRouter,
   auth: authRouter,
   post: postRouter,
   category: categoryRouter,
