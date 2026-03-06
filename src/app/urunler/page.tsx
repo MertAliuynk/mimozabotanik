@@ -14,7 +14,25 @@ type Product = {
   slug: string;
   price: number;
   stock: number;
-  images: { id: string; url: string }[];
+  images: { id: string; url: string }[]; // veritabanındaki images'ı hala çekiyoruz ama kullanmıyoruz
+};
+
+// Geçici resim eşleştirmesi (ürün adına göre - karışıklık olmaz)
+const getProductImage = (productName: string) => {
+  const lowerName = productName.toLowerCase();
+
+  if (lowerName.includes('çanta') || lowerName.includes('canta')) {
+    return '/canta.jpeg';
+  }
+  if (lowerName.includes('karınca') || lowerName.includes('antoryum') || lowerName.includes('kırmızı')) {
+    return '/kirmiziantoryum.jpeg';
+  }
+  if (lowerName.includes('para') || lowerName.includes('çiçeği') || lowerName.includes('paracicegi')) {
+    return '/paracicegi.jpeg';
+  }
+
+  // Hiçbiri uymazsa varsayılan resim
+  return '/canta.jpeg';
 };
 
 export default function UrunlerPage() {
@@ -67,18 +85,16 @@ export default function UrunlerPage() {
                 key={product.id}
                 className="border border-green-100 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow bg-white flex flex-col group"
               >
-                {product.images[0] && (
-                  <div className="relative h-48 bg-gradient-to-t from-green-50 to-white flex items-center justify-center p-2">
-                    <img
-                      src={product.images[0].url}
-                      alt={product.name}
-                      width={300}
-                      height={300}
-                      className="object-contain transition-transform duration-300 group-hover:scale-105 w-full h-full"
-                      loading="lazy" // performans için lazy loading ekledik
-                    />
-                  </div>
-                )}
+                <div className="relative h-48 bg-gradient-to-t from-green-50 to-white flex items-center justify-center p-2">
+                  <img
+                    src={getProductImage(product.name)} // Ürün adına göre doğru resmi çek
+                    alt={product.name}
+                    width={300}
+                    height={300}
+                    className="object-contain transition-transform duration-300 group-hover:scale-105 w-full h-full"
+                    loading="lazy"
+                  />
+                </div>
 
                 <div className="p-4 flex-1 flex flex-col justify-between">
                   <div>
@@ -100,7 +116,7 @@ export default function UrunlerPage() {
                           name: product.name,
                           price: product.price,
                           quantity: 1,
-                          imageUrl: product.images[0]?.url,
+                          imageUrl: getProductImage(product.name), // sepete eklerken de bu resmi kullan
                         })
                       }
                       disabled={product.stock < 1}

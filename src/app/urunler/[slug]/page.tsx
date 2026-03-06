@@ -7,6 +7,24 @@ import { useCartStore } from '@/stores/cartStore';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 
+// Geçici resim eşleştirmesi (ürün adına göre - karışıklık olmaz)
+const getProductImage = (productName: string) => {
+  const lowerName = productName.toLowerCase();
+
+  if (lowerName.includes('çanta') || lowerName.includes('canta')) {
+    return '/canta.jpeg';
+  }
+  if (lowerName.includes('karınca') || lowerName.includes('antoryum') || lowerName.includes('kırmızı')) {
+    return '/kirmiziantoryum.jpeg';
+  }
+  if (lowerName.includes('para') || lowerName.includes('çiçeği') || lowerName.includes('paracicegi')) {
+    return '/paracicegi.jpeg';
+  }
+
+  // Hiçbiri uymazsa varsayılan resim
+  return '/canta.jpeg';
+};
+
 export default function UrunDetayPage() {
   const { slug } = useParams();
   const { data: product, isLoading } = trpc.product.getBySlug.useQuery(slug as string);
@@ -33,7 +51,9 @@ export default function UrunDetayPage() {
     );
   }
 
-  const currentImage = product.images[currentImageIndex];
+  // Thumbnail'ler için aynı resmi kullan (veritabanı images'ı geçici olarak yok sayıyoruz)
+  const mainImageSrc = getProductImage(product.name);
+  const thumbnailImages = [mainImageSrc]; // Şimdilik tek resim, istersen çoğaltabiliriz
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100">
@@ -45,9 +65,9 @@ export default function UrunDetayPage() {
           <div className="space-y-6">
             <div className="relative aspect-[4/3] md:aspect-square bg-gradient-to-t from-green-50 to-white rounded-xl overflow-hidden shadow-lg flex items-center justify-center">
               <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10">
-                {product.images.length > 1 && (
+                {thumbnailImages.length > 1 && (
                   <button
-                    onClick={() => setCurrentImageIndex((prev) => (prev - 1 + product.images.length) % product.images.length)}
+                    onClick={() => setCurrentImageIndex((prev) => (prev - 1 + thumbnailImages.length) % thumbnailImages.length)}
                     className="bg-white/80 rounded-full p-3 shadow hover:bg-green-100 transition disabled:opacity-50"
                   >
                     <svg width="24" height="24" fill="none" stroke="currentColor">
@@ -57,21 +77,19 @@ export default function UrunDetayPage() {
                 )}
               </div>
 
-              {currentImage && (
-                <img
-                  src={currentImage.url}
-                  alt={product.name}
-                  width={600}
-                  height={600}
-                  className="object-contain transition-transform duration-300 hover:scale-105 p-4 w-full h-full"
-                  loading="lazy"
-                />
-              )}
+              <img
+                src={mainImageSrc}
+                alt={product.name}
+                width={600}
+                height={600}
+                className="object-contain transition-transform duration-300 hover:scale-105 p-4 w-full h-full"
+                loading="eager" // ana resim için öncelikli yükleme
+              />
 
               <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10">
-                {product.images.length > 1 && (
+                {thumbnailImages.length > 1 && (
                   <button
-                    onClick={() => setCurrentImageIndex((prev) => (prev + 1) % product.images.length)}
+                    onClick={() => setCurrentImageIndex((prev) => (prev + 1) % thumbnailImages.length)}
                     className="bg-white/80 rounded-full p-3 shadow hover:bg-green-100 transition disabled:opacity-50"
                   >
                     <svg width="24" height="24" fill="none" stroke="currentColor">
@@ -83,18 +101,18 @@ export default function UrunDetayPage() {
             </div>
 
             {/* Thumbnail'ler */}
-            {product.images.length > 1 && (
+            {thumbnailImages.length > 1 && (
               <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-green-300 scrollbar-track-green-50">
-                {product.images.map((img: { id: string; url: string }, idx: number) => (
+                {thumbnailImages.map((imgSrc: string, idx: number) => (
                   <button
-                    key={img.id}
+                    key={idx}
                     onClick={() => setCurrentImageIndex(idx)}
                     className={`flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border-2 transition-all duration-200 shadow-sm hover:shadow-md ${
                       idx === currentImageIndex ? 'border-green-600 scale-105' : 'border-transparent'
                     }`}
                   >
                     <img
-                      src={img.url}
+                      src={imgSrc}
                       alt=""
                       width={96}
                       height={96}
@@ -130,7 +148,7 @@ export default function UrunDetayPage() {
                     name: product.name,
                     price: product.price,
                     quantity: 1,
-                    imageUrl: product.images[0]?.url,
+                    imageUrl: mainImageSrc, // sepete eklerken doğru resmi kullan
                   });
                   router.push('/sepet');
                 }}
