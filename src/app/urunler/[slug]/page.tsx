@@ -2,7 +2,6 @@
 
 import { trpc } from '@/utils/trpc';
 import { useParams } from 'next/navigation';
-import Image from 'next/image';
 import { useState } from 'react';
 import { useCartStore } from '@/stores/cartStore';
 import { useRouter } from 'next/navigation';
@@ -59,12 +58,13 @@ export default function UrunDetayPage() {
               </div>
 
               {currentImage && (
-                <Image
+                <img
                   src={currentImage.url}
                   alt={product.name}
-                  fill
-                  className="object-contain transition-transform duration-300 hover:scale-105 p-4"
-                  priority
+                  width={600}
+                  height={600}
+                  className="object-contain transition-transform duration-300 hover:scale-105 p-4 w-full h-full"
+                  loading="lazy"
                 />
               )}
 
@@ -82,7 +82,7 @@ export default function UrunDetayPage() {
               </div>
             </div>
 
-            {/* Thumbnail'ler - Hata düzeltildi */}
+            {/* Thumbnail'ler */}
             {product.images.length > 1 && (
               <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-green-300 scrollbar-track-green-50">
                 {product.images.map((img: { id: string; url: string }, idx: number) => (
@@ -93,7 +93,14 @@ export default function UrunDetayPage() {
                       idx === currentImageIndex ? 'border-green-600 scale-105' : 'border-transparent'
                     }`}
                   >
-                    <Image src={img.url} alt="" width={96} height={96} className="object-cover" />
+                    <img
+                      src={img.url}
+                      alt=""
+                      width={96}
+                      height={96}
+                      className="object-cover w-full h-full"
+                      loading="lazy"
+                    />
                   </button>
                 ))}
               </div>

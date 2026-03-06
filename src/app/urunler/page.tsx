@@ -1,10 +1,8 @@
-
 'use client';
 export const dynamic = 'force-dynamic';
 import { trpc } from '@/utils/trpc';
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useCartStore } from '@/stores/cartStore';
 import MiniCart from '@/components/MiniCart';
 import { Header } from '@/components/Header';
@@ -25,9 +23,7 @@ export default function UrunlerPage() {
   const { data, isLoading } = trpc.product.getAll.useQuery(
     { search: search || undefined, take: 12, skip: 0 },
     {
-      // keepPreviousData yerine placeholderData kullanıyoruz (eski veriyi göster)
       placeholderData: (previousData) => previousData,
-      // staleTime: 30 * 1000, // istersen 30 sn cache tutabilirsin
     }
   );
 
@@ -66,20 +62,20 @@ export default function UrunlerPage() {
           <div className="text-center py-12 text-gray-500">Ürün bulunamadı</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-7">
-            {data.items.map((product: Product) => (  // ← product'a tip verdik
+            {data.items.map((product: Product) => (
               <div
                 key={product.id}
                 className="border border-green-100 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow bg-white flex flex-col group"
               >
                 {product.images[0] && (
                   <div className="relative h-48 bg-gradient-to-t from-green-50 to-white flex items-center justify-center p-2">
-                    <Image
+                    <img
                       src={product.images[0].url}
                       alt={product.name}
-                      fill
-                      className="object-contain transition-transform duration-300 group-hover:scale-105"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      quality={90}
+                      width={300}
+                      height={300}
+                      className="object-contain transition-transform duration-300 group-hover:scale-105 w-full h-full"
+                      loading="lazy" // performans için lazy loading ekledik
                     />
                   </div>
                 )}
