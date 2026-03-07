@@ -1,37 +1,28 @@
 'use client';
 
 import { trpc } from '@/utils/trpc';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useCartStore } from '@/stores/cartStore';
-import { useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 
-// Geçici resim eşleştirmesi (ürün adına göre - karışıklık olmaz)
+// Geçici resim eşleştirmesi (ürün adına göre)
 const getProductImage = (productName: string) => {
   const lowerName = productName.toLowerCase();
-
-  if (lowerName.includes('çanta') || lowerName.includes('canta')) {
-    return '/canta.jpeg';
-  }
-  if (lowerName.includes('karınca') || lowerName.includes('antoryum') || lowerName.includes('kırmızı')) {
+  if (lowerName.includes('çanta') || lowerName.includes('canta')) return '/canta.jpeg';
+  if (lowerName.includes('karınca') || lowerName.includes('antoryum') || lowerName.includes('kırmızı'))
     return '/kirmiziantoryum.jpeg';
-  }
-  if (lowerName.includes('para') || lowerName.includes('çiçeği') || lowerName.includes('paracicegi')) {
+  if (lowerName.includes('para') || lowerName.includes('çiçeği') || lowerName.includes('paracicegi'))
     return '/paracicegi.jpeg';
-  }
-
-  // Hiçbiri uymazsa varsayılan resim
   return '/canta.jpeg';
 };
 
 export default function UrunDetayPage() {
   const { slug } = useParams();
-  const { data: product, isLoading } = trpc.product.getBySlug.useQuery(slug as string);
-
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const addToCart = useCartStore((state) => state.addItem);
   const router = useRouter();
+  const { data: product, isLoading } = trpc.product.getBySlug.useQuery(slug as string);
+  const [isLoadingOrder, setIsLoadingOrder] = useState(false);
+
+  const createOrder = trpc.order.create.useMutation();
 
   if (isLoading) {
     return (
@@ -51,78 +42,51 @@ export default function UrunDetayPage() {
     );
   }
 
-  // Thumbnail'ler için aynı resmi kullan (veritabanı images'ı geçici olarak yok sayıyoruz)
   const mainImageSrc = getProductImage(product.name);
-  const thumbnailImages = [mainImageSrc]; // Şimdilik tek resim, istersen çoğaltabiliriz
+
+  const handleBuyNow = async () => {
+    if (!product) return;
+    setIsLoadingOrder(true);
+    try {
+      const order = await createOrder.mutateAsync({
+        items: [
+          {
+            productId: product.id,
+            name: product.name,
+            price: product.price,
+            quantity: 1,
+          },
+        ],
+        totalPrice: product.price,
+      });
+
+      // Sipariş oluşturulduktan sonra ödeme sayfasına yönlendir
+      router.push(`/odeme/${order.id}`);
+    } catch (err) {
+      console.error(err);
+      alert('Sipariş oluşturulamadı. Lütfen tekrar deneyin.');
+    } finally {
+      setIsLoadingOrder(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100">
       <Header />
-
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="grid md:grid-cols-2 gap-10">
           {/* Sol: Resim Alanı */}
           <div className="space-y-6">
             <div className="relative aspect-[4/3] md:aspect-square bg-gradient-to-t from-green-50 to-white rounded-xl overflow-hidden shadow-lg flex items-center justify-center">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10">
-                {thumbnailImages.length > 1 && (
-                  <button
-                    onClick={() => setCurrentImageIndex((prev) => (prev - 1 + thumbnailImages.length) % thumbnailImages.length)}
-                    className="bg-white/80 rounded-full p-3 shadow hover:bg-green-100 transition disabled:opacity-50"
-                  >
-                    <svg width="24" height="24" fill="none" stroke="currentColor">
-                      <path d="M15 19l-7-7 7-7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-
               <img
                 src={mainImageSrc}
                 alt={product.name}
                 width={600}
                 height={600}
                 className="object-contain transition-transform duration-300 hover:scale-105 p-4 w-full h-full"
-                loading="eager" // ana resim için öncelikli yükleme
+                loading="eager"
               />
-
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10">
-                {thumbnailImages.length > 1 && (
-                  <button
-                    onClick={() => setCurrentImageIndex((prev) => (prev + 1) % thumbnailImages.length)}
-                    className="bg-white/80 rounded-full p-3 shadow hover:bg-green-100 transition disabled:opacity-50"
-                  >
-                    <svg width="24" height="24" fill="none" stroke="currentColor">
-                      <path d="M9 5l7 7-7 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </button>
-                )}
-              </div>
             </div>
-
-            {/* Thumbnail'ler */}
-            {thumbnailImages.length > 1 && (
-              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-green-300 scrollbar-track-green-50">
-                {thumbnailImages.map((imgSrc: string, idx: number) => (
-                  <button
-                    key={idx}
-                    onClick={() => setCurrentImageIndex(idx)}
-                    className={`flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border-2 transition-all duration-200 shadow-sm hover:shadow-md ${
-                      idx === currentImageIndex ? 'border-green-600 scale-105' : 'border-transparent'
-                    }`}
-                  >
-                    <img
-                      src={imgSrc}
-                      alt=""
-                      width={96}
-                      height={96}
-                      className="object-cover w-full h-full"
-                      loading="lazy"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* Sağ: Bilgi Alanı */}
@@ -134,28 +98,21 @@ export default function UrunDetayPage() {
               </p>
 
               <div className="mb-6">
-                <span className={`inline-block px-4 py-2 rounded-full font-medium text-lg ${
-                  product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}>
+                <span
+                  className={`inline-block px-4 py-2 rounded-full font-medium text-lg ${
+                    product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}
+                >
                   Stok Durumu: {product.stock > 0 ? `${product.stock} adet mevcut` : 'Stokta yok'}
                 </span>
               </div>
 
               <button
-                onClick={() => {
-                  addToCart({
-                    productId: product.id,
-                    name: product.name,
-                    price: product.price,
-                    quantity: 1,
-                    imageUrl: mainImageSrc, // sepete eklerken doğru resmi kullan
-                  });
-                  router.push('/sepet');
-                }}
-                disabled={product.stock < 1}
+                onClick={handleBuyNow}
+                disabled={product.stock < 1 || isLoadingOrder}
                 className="w-full bg-green-600 text-white py-5 rounded-xl text-xl font-bold shadow-lg hover:bg-green-700 active:scale-[0.98] transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-green-300 mb-8"
               >
-                Sepete Ekle
+                {isLoadingOrder ? 'Yönlendiriliyor...' : 'Satın Al'}
               </button>
             </div>
 

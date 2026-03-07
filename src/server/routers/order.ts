@@ -1,55 +1,37 @@
+import { createTRPCRouter, publicProcedure } from '@/server/trpc';
 import { z } from 'zod';
-import { createTRPCRouter, publicProcedure, adminProcedure } from '../trpc';
-import { TRPCError } from '@trpc/server';
-import { PrismaClient } from '@prisma/client';
-
-type Prisma = PrismaClient;
+import { db } from '@/lib/db';
 
 export const orderRouter = createTRPCRouter({
-  // Müşteri: Sipariş oluştur
+  // Sipariş oluştur (ürün seçildiğinde)
   create: publicProcedure
-    .input(z.object({
-      customerName: z.string().min(1, 'İsim zorunlu'),
-      customerSurname: z.string().optional(),
-      address: z.string().min(10, 'Adres zorunlu'),
-      note: z.string().optional(),
-      items: z.array(z.object({
-        productId: z.string(),
-        name: z.string(),
-        price: z.number(),
-        quantity: z.number().min(1),
-      })),
-      totalPrice: z.number().positive(),
-    }))
-    .mutation(async ({ ctx, input }) => {
-      if (!ctx.db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
-
-      const db = ctx.db as Prisma;
-
-      // Stok kontrolü
-      for (const item of input.items) {
-        const product = await db.product.findUnique({
-          where: { id: item.productId },
-        });
-
-        if (!product || product.stock < item.quantity) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: `${item.name} için stok yetersiz (mevcut: ${product?.stock ?? 0})`,
-          });
-        }
-      }
-
-      // Sipariş oluştur
+    .input(
+      z.object({
+        customerName: z.string().optional(),
+        customerSurname: z.string().optional(),
+        address: z.string().optional(),
+        note: z.string().optional(),
+        items: z.array(
+          z.object({
+            productId: z.string(),
+            name: z.string(),
+            price: z.number(),
+            quantity: z.number(),
+          })
+        ),
+        totalPrice: z.number(),
+      })
+    )
+    .mutation(async ({ input }) => {
       const order = await db.order.create({
         data: {
-          customerName: input.customerName,
-          customerSurname: input.customerSurname,
-          address: input.address,
-          note: input.note,
+          customerName: input.customerName || '',
+          customerSurname: input.customerSurname || '',
+          address: input.address || '',
+          note: input.note || '',
           totalPrice: input.totalPrice,
           items: {
-            create: input.items.map(item => ({
+            create: input.items.map((item) => ({
               productId: item.productId,
               name: item.name,
               price: item.price,
@@ -57,48 +39,32 @@ export const orderRouter = createTRPCRouter({
             })),
           },
         },
+        include: {
+          items: true,
+        },
       });
-
-      // Stok düşür
-      for (const item of input.items) {
-        await db.product.update({
-          where: { id: item.productId },
-          data: { stock: { decrement: item.quantity } },
-        });
-      }
-
       return order;
     }),
 
-  // Admin: Tüm siparişleri getir
-  getAllAdmin: adminProcedure.query(async ({ ctx }) => {
-    if (!ctx.db) return [];
-    return (ctx.db as Prisma).order.findMany({
-      include: { items: true },
-      orderBy: { createdAt: 'desc' },
+  // Sipariş ID ile getir (odeme sayfası için)
+  getById: publicProcedure.input(z.string()).query(({ input }) => {
+    return db.order.findUnique({
+      where: { id: input },
+      include: {
+        items: {
+          include: {
+            product: true, // iyzicoLink için
+          },
+        },
+      },
     });
   }),
 
-  // Admin: Tek sipariş getir
-  getByIdAdmin: adminProcedure
-    .input(z.string())
-    .query(async ({ ctx, input: id }) => {
-      if (!ctx.db) return null;
-      return (ctx.db as Prisma).order.findUnique({
-        where: { id },
-        include: { items: true },
-      });
-    }),
-
-  // Admin: Status güncelle
-  updateStatus: adminProcedure
-    .input(z.object({
-      id: z.string(),
-      status: z.enum(['Bekliyor', 'Gönderildi', 'İptal Edildi']),
-    }))
-    .mutation(async ({ ctx, input }) => {
-      if (!ctx.db) return null;
-      return (ctx.db as Prisma).order.update({
+  // Sipariş durumu güncelle
+  updateStatus: publicProcedure
+    .input(z.object({ id: z.string(), status: z.string() }))
+    .mutation(({ input }) => {
+      return db.order.update({
         where: { id: input.id },
         data: { status: input.status },
       });

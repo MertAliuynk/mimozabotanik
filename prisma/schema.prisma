@@ -27,56 +27,59 @@ model User {
 
   @@map("users")
 }
-model Product {
-  id          String   @id @default(uuid())
-  name        String
-  slug        String   @unique
-  description String?  @db.Text
-  price       Float
-  stock       Int      @default(0)
-  published   Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 
+model Product {
+  id          String         @id @default(uuid())
+  name        String
+  slug        String         @unique
+  description String?        @db.Text
+  price       Float
+  stock       Int            @default(0)
+  published   Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  iyzicoLink  String? // Tek ürün ödeme linki için
   images      ProductImage[]
+
   @@index([slug])
   @@index([published])
 }
 
 model ProductImage {
-  id        String  @id @default(uuid())
-  filename  String
-  url       String
-  alt       String?
-  order     Int     @default(0)   // resimler sıralaması için
+  id       String  @id @default(uuid())
+  filename String
+  url      String
+  alt      String?
+  order    Int     @default(0) // resimler sıralaması için
 
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String
 
   @@index([productId])
 }
-model Order {
-  id         String      @id @default(uuid())
-  customerName   String
-  customerSurname String?  // opsiyonel ama formda zorunlu yapabiliriz
-  address    String
-  note       String?     @db.Text
-  status     String      @default("Bekliyor")  // "Bekliyor", "Gönderildi", "Iptal" vs.
-  totalPrice Float
-  createdAt  DateTime    @default(now())
 
-  items      OrderItem[]
+model Order {
+  id              String   @id @default(uuid())
+  customerName    String
+  customerSurname String? // opsiyonel ama formda zorunlu yapabiliriz
+  address         String
+  note            String?  @db.Text
+  status          String   @default("Bekliyor") // "Bekliyor", "Gönderildi", "Iptal" vs.
+  totalPrice      Float
+  createdAt       DateTime @default(now())
+
+  items OrderItem[]
 }
 
 model OrderItem {
-  id        String   @id @default(uuid())
+  id        String @id @default(uuid())
   productId String
-  name      String   // ürün adı snapshot
-  price     Float    // o anki fiyat snapshot
+  name      String // ürün adı snapshot
+  price     Float // o anki fiyat snapshot
   quantity  Int
 
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId   String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId String
 }
 
 // Account Model for OAuth
@@ -113,15 +116,15 @@ model Session {
 
 // Post Model
 model Post {
-  id          String      @id @default(cuid())
+  id          String   @id @default(cuid())
   title       String
   description String?
-  content     String?     @db.Text
-  published   Boolean     @default(false)
-  featured    Boolean     @default(false)
-  slug        String      @unique
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  content     String?  @db.Text
+  published   Boolean  @default(false)
+  featured    Boolean  @default(false)
+  slug        String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   authorId    String
   categoryId  String?
 
@@ -167,17 +170,17 @@ model Tag {
 
 // Image Model
 model Image {
-  id        String   @id @default(cuid())
-  filename  String
+  id           String   @id @default(cuid())
+  filename     String
   originalName String
-  mimeType  String
-  size      Int
-  url       String
-  alt       String?
-  postId    String?
-  serviceId String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  mimeType     String
+  size         Int
+  url          String
+  alt          String?
+  postId       String?
+  serviceId    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Relations
   post    Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
@@ -219,16 +222,16 @@ model ServiceArea {
 
 // ContactInfo Model (İletişim Bilgileri)
 model ContactInfo {
-  id          String   @id @default(cuid())
-  companyName String   @default("GreenPark Peyzaj")
-  address     String
-  phone       String
-  email       String
-  latitude    Float
-  longitude   Float
+  id           String   @id @default(cuid())
+  companyName  String   @default("GreenPark Peyzaj")
+  address      String
+  phone        String
+  email        String
+  latitude     Float
+  longitude    Float
   workingHours Json?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@map("contact_info")
 }
@@ -250,16 +253,16 @@ model Reference {
 
 // Gallery Model
 model Gallery {
-  id          String         @id @default(cuid())
+  id          String   @id @default(cuid())
   title       String
-  description String?        @db.Text
-  order       Int            @default(0)
-  published   Boolean        @default(true)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  description String?  @db.Text
+  order       Int      @default(0)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relations
-  images      GalleryImage[]
+  images GalleryImage[]
 
   @@map("galleries")
 }

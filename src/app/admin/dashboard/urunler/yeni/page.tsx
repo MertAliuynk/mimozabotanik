@@ -16,6 +16,7 @@ export default function YeniUrunPage() {
     description: '',
     price: '',
     stock: '0',
+    link: '', // ✅ link alanı eklendi
   });
 
   const [images, setImages] = useState<
@@ -81,6 +82,7 @@ export default function YeniUrunPage() {
         description: form.description || undefined,
         price: parseFloat(form.price),
         stock: parseInt(form.stock),
+        iyzicoLink: form.link || undefined, // ✅ prisma alanı ile eşleşti
         images: uploadedImages,
       });
 
@@ -142,6 +144,17 @@ export default function YeniUrunPage() {
         </div>
 
         <div>
+          <label className="block mb-1 font-medium">Ürün Linki (opsiyonel)</label>
+          <input
+            type="url"
+            value={form.link}
+            onChange={(e) => setForm({ ...form, link: e.target.value })}
+            className="w-full p-3 border rounded"
+            placeholder="https://example.com"
+          />
+        </div>
+
+        <div>
           <label className="block mb-2 font-medium">Resimler (birden fazla seçebilirsiniz) *</label>
           <input
             type="file"
@@ -169,10 +182,10 @@ export default function YeniUrunPage() {
 
         <button
           type="submit"
-          disabled={createMutation.isPending}  // ← isLoading yerine isPending
+          disabled={createMutation.isPending}
           className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {createMutation.isPending ? 'Kaydediliyor...' : 'Ürünü Kaydet'}  // ← burası da değişti
+          {createMutation.isPending ? 'Kaydediliyor...' : 'Ürünü Kaydet'}
         </button>
       </form>
     </div>
