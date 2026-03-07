@@ -52,9 +52,6 @@ export const orderRouter = createTRPCRouter({
       where: { id: input },
       include: {
         items: {
-          include: {
-            product: true, // iyzicoLink için
-          },
         },
       },
     });
