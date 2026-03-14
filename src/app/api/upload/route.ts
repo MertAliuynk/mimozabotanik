@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     });
     
     // Generate URL for accessing the image
-    const fileUrl = `http://${process.env.MINIO_ENDPOINT}:${process.env.MINIO_PORT}/${bucketName}/${fileName}`;
+    const fileUrl = `https://${process.env.MINIO_ENDPOINT}/${bucketName}/${fileName}`;
     
     return NextResponse.json({
       url: fileUrl,
