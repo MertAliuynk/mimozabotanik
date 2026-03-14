@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   reactCompiler: true,
   images: {
     remotePatterns: [
@@ -17,11 +16,18 @@ const nextConfig: NextConfig = {
         port: '9000',
         pathname: '/greenpark-images/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'minio.karadenizdis.com',
+        pathname: '/uploads/**', // ✅ uploads bucket için düzeltildi
+      },
     ],
+
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-    // Allow localhost and private IPs for development
+
+    // developmentta optimization kapalı
     unoptimized: process.env.NODE_ENV === 'development',
   },
 };
