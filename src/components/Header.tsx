@@ -15,7 +15,7 @@ export function Header() {
       <div className="bg-green-800 py-1 sm:py-2">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
           <Link 
-            href="tel:+905523557506" 
+            href="tel:+905016971944" 
             className="text-white text-sm sm:text-base px-4 sm:px-8 py-1 sm:py-2 border-2 border-white hover:bg-white hover:text-green-700 transition-colors font-bold tracking-wide"
           >
             HEMEN ARA
