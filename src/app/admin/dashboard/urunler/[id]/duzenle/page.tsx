@@ -1,36 +1,88 @@
 'use client';
 
 import { trpc } from '@/utils/trpc';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 
-export default function YeniUrunPage() {
-  const createMutation = trpc.product.create.useMutation();
-  const confirmUpload = trpc.upload.confirmUpload.useMutation();
+type ProductImage = {
+  filename: string;
+  url: string;
+  alt?: string;
+  order: number;
+};
 
+export default function UrunDuzenlePage() {
+  const { id } = useParams();
   const router = useRouter();
+
+  const { data: product, isLoading } = trpc.product.getByIdAdmin.useQuery(id as string);
+  const updateMutation = trpc.product.update.useMutation();
+  const confirmUpload = trpc.upload.confirmUpload.useMutation();
 
   const [form, setForm] = useState({
     name: '',
     description: '',
     price: '',
     stock: '0',
-    link: '', // ✅ link alanı eklendi
+    iyzicoLink: '',
   });
+  const [images, setImages] = useState<ProductImage[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
 
-  const [images, setImages] = useState<
-    { file: File; preview: string; alt: string; order: number }[]
-  >([]);
+  useEffect(() => {
+    if (!product) return;
+    setForm({
+      name: product.name,
+      description: product.description || '',
+      price: String(product.price),
+      stock: String(product.stock),
+      iyzicoLink: product.iyzicoLink || '',
+    });
+    setImages(
+      product.images.map((img: ProductImage) => ({
+        filename: img.filename,
+        url: img.url,
+        alt: img.alt || '',
+        order: img.order,
+      }))
+    );
+  }, [product]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-    const newImages = Array.from(e.target.files).map((file, index) => ({
-      file,
-      preview: URL.createObjectURL(file),
-      alt: '',
-      order: images.length + index,
-    }));
-    setImages((prev) => [...prev, ...newImages]);
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
+    setIsUploading(true);
+
+    try {
+      for (const file of Array.from(e.target.files)) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!uploadResponse.ok) throw new Error('Upload failed');
+
+        const { fileName, url } = await uploadResponse.json();
+
+        const savedImage = await confirmUpload.mutateAsync({
+          filename: fileName,
+          mimeType: file.type,
+          size: file.size,
+        });
+
+        setImages((prev) => [
+          ...prev,
+          { filename: fileName, url: savedImage.url || url, alt: '', order: prev.length },
+        ]);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Resim yükleme hatası!');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const removeImage = (index: number) => {
@@ -41,53 +93,22 @@ export default function YeniUrunPage() {
     e.preventDefault();
 
     if (images.length === 0) {
-      alert('En az 1 resim yüklemelisiniz');
+      alert('En az 1 resim gerekli');
       return;
     }
 
     try {
-      const uploadedImages = [];
-
-      for (const img of images) {
-        const formData = new FormData();
-        formData.append('file', img.file);
-
-        const uploadResponse = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!uploadResponse.ok) {
-          throw new Error('Upload failed');
-        }
-
-        const { fileName } = await uploadResponse.json();
-
-        const savedImage = await confirmUpload.mutateAsync({
-          filename: fileName,
-          mimeType: img.file.type,
-          size: img.file.size,
-          alt: img.alt,
-        });
-
-        uploadedImages.push({
-          filename: savedImage.filename,
-          url: savedImage.url,
-          alt: savedImage.alt || '',
-          order: img.order,
-        });
-      }
-
-      await createMutation.mutateAsync({
+      await updateMutation.mutateAsync({
+        id: id as string,
         name: form.name,
         description: form.description || undefined,
         price: parseFloat(form.price),
         stock: parseInt(form.stock),
-        iyzicoLink: form.link || undefined, // ✅ prisma alanı ile eşleşti
-        images: uploadedImages,
+        iyzicoLink: form.iyzicoLink || undefined,
+        images: images.map((img, index) => ({ ...img, order: index })),
       });
 
-      alert('Ürün başarıyla eklendi!');
+      alert('Ürün güncellendi!');
       router.push('/admin/dashboard/urunler');
     } catch (err) {
       console.error(err);
@@ -95,9 +116,12 @@ export default function YeniUrunPage() {
     }
   };
 
+  if (isLoading) return <div className="p-8 text-center">Yükleniyor...</div>;
+  if (!product) return <div className="p-8 text-center">Ürün bulunamadı</div>;
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8">Yeni Ürün Ekle</h1>
+      <h1 className="text-3xl font-bold mb-8">Ürünü Düzenle</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
@@ -148,8 +172,8 @@ export default function YeniUrunPage() {
           <label className="block mb-1 font-medium">Ürün Linki (opsiyonel)</label>
           <input
             type="url"
-            value={form.link}
-            onChange={(e) => setForm({ ...form, link: e.target.value })}
+            value={form.iyzicoLink}
+            onChange={(e) => setForm({ ...form, iyzicoLink: e.target.value })}
             className="w-full p-3 border rounded"
             placeholder="https://example.com"
           />
@@ -162,13 +186,15 @@ export default function YeniUrunPage() {
             accept="image/*"
             multiple
             onChange={handleImageChange}
+            disabled={isUploading}
             className="mb-4"
           />
+          {isUploading && <p className="text-sm text-gray-500 mb-4">Yükleniyor...</p>}
 
           <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">
             {images.map((img, idx) => (
-              <div key={idx} className="relative border rounded overflow-hidden">
-                <img src={img.preview} alt="" className="w-full h-32 object-cover" />
+              <div key={img.url + idx} className="relative border rounded overflow-hidden">
+                <img src={img.url} alt="" className="w-full h-32 object-cover" />
                 <button
                   type="button"
                   onClick={() => removeImage(idx)}
@@ -183,10 +209,10 @@ export default function YeniUrunPage() {
 
         <button
           type="submit"
-          disabled={createMutation.isPending}
+          disabled={updateMutation.isPending || isUploading}
           className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {createMutation.isPending ? 'Kaydediliyor...' : 'Ürünü Kaydet'}
+          {updateMutation.isPending ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
         </button>
       </form>
     </div>

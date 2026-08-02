@@ -1,29 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { generateUniqueFilename, saveUploadedFile } from '../../../lib/upload';
 
-// Skip this route during build if MinIO is not available
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    // Skip MinIO connection in build/deploy phase
-    if (process.env.NODE_ENV === 'production' && !process.env.MINIO_ENDPOINT) {
-      return NextResponse.json(
-        { error: 'Upload service not configured' },
-        { status: 503 }
-      );
-    }
-
-    // Import MinIO only at runtime
-    const { minioClient, ensureBucketExists } = await import('../../../lib/minio');
-    
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    
+
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
-    
+
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
@@ -32,7 +21,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     // Validate file size (5MB limit)
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
@@ -41,36 +30,18 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
-    // Generate unique filename
-    const timestamp = Date.now();
-    const randomString = Math.random().toString(36).substring(2, 15);
-    const extension = file.name.split('.').pop();
-    const fileName = `${timestamp}-${randomString}.${extension}`;
-    
-    // Convert file to buffer
+
+    const fileName = generateUniqueFilename(file.name);
+
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    
-    // Ensure bucket exists
-    const bucketName = process.env.MINIO_BUCKET_NAME || 'greenpark-images';
-    await ensureBucketExists(bucketName);
-    
-    // Upload to Minio
-    if (!minioClient) {
-      throw new Error('MinIO not configured');
-    }
-    
-    await minioClient.putObject(bucketName, fileName, buffer, file.size, {
-      'Content-Type': file.type,
-    });
-    
-    // Generate URL for accessing the image
-    const fileUrl = `https://${process.env.MINIO_ENDPOINT}/${bucketName}/${fileName}`;
-    
+
+    const fileUrl = await saveUploadedFile(buffer, fileName);
+
     return NextResponse.json({
       url: fileUrl,
-      fileName: file.name,
+      fileName,
+      originalName: file.name,
       size: file.size,
       type: file.type,
     });

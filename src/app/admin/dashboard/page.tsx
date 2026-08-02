@@ -175,7 +175,7 @@ export default function AdminDashboard() {
             </span>
           </div>
           <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
-            <span className="text-sm font-medium text-gray-900">Minio Storage</span>
+            <span className="text-sm font-medium text-gray-900">Dosya Depolama</span>
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
               Aktif
             </span>

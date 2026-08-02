@@ -72,7 +72,7 @@ export default function AdminUrunlerPage() {
                 <td className="px-6 py-4 text-center">
                   <div className="flex gap-3 justify-center">
                     <button
-                      onClick={() => router.push(`/admin/urunler/duzenle/${product.id}`)}
+                      onClick={() => router.push(`/admin/dashboard/urunler/${product.id}/duzenle`)}
                       className="text-blue-600 hover:underline"
                     >
                       Düzenle

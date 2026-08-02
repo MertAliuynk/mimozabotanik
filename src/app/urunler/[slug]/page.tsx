@@ -5,22 +5,14 @@ import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Header } from '@/components/Header';
 
-// Geçici resim eşleştirmesi (ürün adına göre)
-const getProductImage = (productName: string) => {
-  const lowerName = productName.toLowerCase();
-  if (lowerName.includes('çanta') || lowerName.includes('canta')) return '/canta.jpeg';
-  if (lowerName.includes('karınca') || lowerName.includes('antoryum') || lowerName.includes('kırmızı'))
-    return '/kirmiziantoryum.jpeg';
-  if (lowerName.includes('para') || lowerName.includes('çiçeği') || lowerName.includes('paracicegi'))
-    return '/paracicegi.jpeg';
-  return '/canta.jpeg';
-};
+const FALLBACK_IMAGE = '/canta.jpeg';
 
 export default function UrunDetayPage() {
   const { slug } = useParams();
   const router = useRouter();
   const { data: product, isLoading } = trpc.product.getBySlug.useQuery(slug as string);
   const [isLoadingOrder, setIsLoadingOrder] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   const createOrder = trpc.order.create.useMutation();
 
@@ -42,7 +34,8 @@ export default function UrunDetayPage() {
     );
   }
 
-  const mainImageSrc = getProductImage(product.name);
+  const images = product.images ?? [];
+  const mainImageSrc = images[selectedImageIndex]?.url || FALLBACK_IMAGE;
 
   const handleBuyNow = async () => {
     if (!product) return;
@@ -80,13 +73,34 @@ export default function UrunDetayPage() {
             <div className="relative aspect-[4/3] md:aspect-square bg-gradient-to-t from-green-50 to-white rounded-xl overflow-hidden shadow-lg flex items-center justify-center">
               <img
                 src={mainImageSrc}
-                alt={product.name}
+                alt={images[selectedImageIndex]?.alt || product.name}
                 width={600}
                 height={600}
                 className="object-contain transition-transform duration-300 hover:scale-105 p-4 w-full h-full"
                 loading="eager"
               />
             </div>
+
+            {images.length > 1 && (
+              <div className="flex gap-3 overflow-x-auto">
+                {images.map((image: { url: string; alt?: string | null }, index: number) => (
+                  <button
+                    key={image.url + index}
+                    type="button"
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`relative w-20 h-20 shrink-0 rounded-lg overflow-hidden border-2 ${
+                      index === selectedImageIndex ? 'border-green-600' : 'border-transparent'
+                    }`}
+                  >
+                    <img
+                      src={image.url}
+                      alt={image.alt || product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Sağ: Bilgi Alanı */}

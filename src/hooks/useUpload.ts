@@ -14,38 +14,32 @@ export function useUpload() {
     error: null,
   });
 
-  const getUploadUrlMutation = api.upload.getUploadUrl.useMutation();
   const confirmUploadMutation = api.upload.confirmUpload.useMutation();
 
   const uploadFile = async (file: File, alt?: string, postId?: string) => {
     try {
       setUploadState({ isUploading: true, progress: 0, error: null });
 
-      // Get upload URL
-      const { uploadUrl, fileUrl, filename } = await getUploadUrlMutation.mutateAsync({
-        filename: file.name,
-        mimeType: file.type,
-        size: file.size,
-      });
+      // Upload file to local storage via the REST endpoint
+      const formData = new FormData();
+      formData.append('file', file);
 
-      // Upload to Minio
-      const uploadResponse = await fetch(uploadUrl, {
-        method: 'PUT',
-        body: file,
-        headers: {
-          'Content-Type': file.type,
-        },
+      const uploadResponse = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
       });
 
       if (!uploadResponse.ok) {
         throw new Error('Upload failed');
       }
 
+      const { url: fileUrl, fileName } = await uploadResponse.json();
+
       setUploadState(prev => ({ ...prev, progress: 100 }));
 
       // Confirm upload in database
       const image = await confirmUploadMutation.mutateAsync({
-        filename,
+        filename: fileName,
         mimeType: file.type,
         size: file.size,
         alt,

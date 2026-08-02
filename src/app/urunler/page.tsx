@@ -8,28 +8,15 @@ import MiniCart from '@/components/MiniCart';
 // Tip tanımı (Prisma'dan gelen Product tipi - basit hali)
 type Product = {
   id: string;
-  name: string;  
+  name: string;
   slug: string;
   price: number;
   stock: number;
   iyzicoLink?: string | null; // Ödeme linki alanı
+  images: { url: string; alt?: string | null }[];
 };
 
-// Geçici resim eşleştirmesi (ürün adına göre - karışıklık olmaz)
-const getProductImage = (productName: string) => {
-  const lowerName = productName.toLowerCase();
-
-  if (lowerName.includes('çanta') || lowerName.includes('canta')) return '/canta.jpeg';
-  if (lowerName.includes('karınca') || lowerName.includes('antoryum') || lowerName.includes('kırmızı')) return '/kirmiziantoryum.jpeg';
-  if (lowerName.includes('para')  || lowerName.includes('paracicegi')) return '/paracicegi.jpeg';
-  if (lowerName.includes('midi') || lowerName.includes('midi orkide')) return '/midiorkide.jpeg';
-  if (lowerName.includes('maxi') || lowerName.includes('maxi orkide')) return '/maxiorkide.jpeg';
-  if (lowerName.includes('ortanca')) return '/ortanca.jpeg';
-  if (lowerName.includes('pembe')) return '/pembelilyum.jpeg';
-  if (lowerName.includes('begonya')) return '/begonya.jpeg';
-
-  return '/canta.jpeg'; // Varsayılan resim
-};
+const FALLBACK_IMAGE = '/canta.jpeg';
 
 export default function UrunlerPage() {
   const [search, setSearch] = useState('');
@@ -68,8 +55,8 @@ export default function UrunlerPage() {
               >
                 <div className="relative h-48 bg-gradient-to-t from-green-50 to-white flex items-center justify-center p-2">
                   <img
-                    src={getProductImage(product.name)}
-                    alt={product.name}
+                    src={product.images[0]?.url || FALLBACK_IMAGE}
+                    alt={product.images[0]?.alt || product.name}
                     width={300}
                     height={300}
                     className="object-contain transition-transform duration-300 group-hover:scale-105 w-full h-full"

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 export default function AdminLoginPage() {
-  const [credentials, setCredentials] = useState({ email: '', password: '' });
+  const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -18,7 +18,7 @@ export default function AdminLoginPage() {
     try {
       // Admin login logic will be implemented here
       // For now, simple check
-      if (credentials.email === 'mimozacicekcilik@gmail.com' && credentials.password === 'admin123') {
+      if (credentials.username === 'admin' && credentials.password === 'admin123') {
         localStorage.setItem('adminAuth', 'true');
         // Set cookie for server-side authentication
         document.cookie = 'admin-session=true; path=/; max-age=86400'; // 24 hours
@@ -57,17 +57,17 @@ export default function AdminLoginPage() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Kullanıcı Adı (E-posta)
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+                Kullanıcı Adı
               </label>
               <input
-                id="email"
-                type="email"
+                id="username"
+                type="text"
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                placeholder="admin@greenparkpeyzaj.com"
-                value={credentials.email}
-                onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
+                placeholder="kullanıcı adı"
+                value={credentials.username}
+                onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
               />
             </div>
 
