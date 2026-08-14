@@ -33,9 +33,9 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
-# uploaded files (local storage, keep the directory tracked)
-/public/uploads/*
-!/public/uploads/.gitkeep
+# uploaded files (local storage, outside public/ so deploys don't wipe them — see src/lib/upload.ts)
+/uploads-data/*
+!/uploads-data/.gitkeep
 
 # vercel
 .vercel

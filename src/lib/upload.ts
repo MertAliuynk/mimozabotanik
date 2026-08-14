@@ -1,8 +1,21 @@
 import { mkdir, unlink, writeFile } from 'fs/promises';
 import path from 'path';
 
-export const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads');
-export const UPLOAD_URL_PREFIX = '/uploads';
+// ÖNEMLİ: Dosyalar bilerek `public/` klasörünün DIŞINA yazılıyor.
+// Çoğu deploy akışı (git pull + rebuild, docker image'ı yeniden build etme,
+// rsync --delete vb.) `public/` klasörünü her seferinde sıfırlar/yeniden
+// kopyalar — bu yüzden oraya yazılan yüklenen dosyalar bir sonraki deploy'da
+// kaybolur (uygulama "başarılı" der ama dosya bir süre sonra 404 verir).
+// UPLOAD_DIR, ortam değişkeni ile kalıcı bir diske (ör. bir Docker volume
+// veya sunucuda deploy'un dokunmadığı ayrı bir klasör) yönlendirilebilir;
+// tanımlı değilse proje kökünün yanında `uploads-data` klasörü kullanılır.
+export const UPLOAD_DIR = process.env.UPLOAD_DIR
+  ? path.resolve(process.env.UPLOAD_DIR)
+  : path.join(process.cwd(), 'uploads-data');
+
+// Dosyalar artık public/ altında olmadığından statik olarak servis edilemez;
+// src/app/api/uploads/[filename]/route.ts bu prefix'i karşılayıp UPLOAD_DIR'dan okur.
+export const UPLOAD_URL_PREFIX = '/api/uploads';
 
 export const ensureUploadDirExists = async () => {
   await mkdir(UPLOAD_DIR, { recursive: true });

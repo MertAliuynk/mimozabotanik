@@ -44,7 +44,7 @@ export default function AdminLoginPage() {
             </svg>
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Admin Panel</h1>
-          <p className="text-gray-600 mt-2">GreenPark Peyzaj Yönetim Sistemi</p>
+          <p className="text-gray-600 mt-2">mimoza botanik Yönetim Sistemi</p>
         </div>
 
         {/* Login Form */}
@@ -108,7 +108,7 @@ export default function AdminLoginPage() {
 
         {/* Footer */}
         <div className="text-center mt-8 text-sm text-gray-500">
-          <p>© 2025 GreenPark Peyzaj - Tüm hakları saklıdır</p>
+          <p></p>
         </div>
       </div>
     </div>
